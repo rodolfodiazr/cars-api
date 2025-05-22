@@ -15,13 +15,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Cars"
+                $ref: "#/components/schemas/Response"
         '500':
           description: Internal Server Error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/Response'
     post:
       summary: Create a new car.
       description: Add a new car.
@@ -30,26 +30,26 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Car"
+              $ref: "#/components/schemas/Response"
       responses:
         '201':
           description: Car created successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Car"
+                $ref: "#/components/schemas/Response"
         '400':
           description: Bad request due malformed JSON, or validation error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/Response'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/Response'
   /cars/{id}:
     get:
       summary: Get a car by ID.
@@ -66,25 +66,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Car"
+                $ref: "#/components/schemas/Response"
         '400':
           description: Bad request due to invalid ID.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/Response'
         '404':
           description: Car not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/Response'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/Response'
     put:
       summary: Update a car by ID.
       description: Modify details of an existing car.
@@ -99,32 +99,32 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Car"
+              $ref: "#/components/schemas/Response"
       responses:
         '200':
           description: Car updated successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Car"
+                $ref: "#/components/schemas/Response"
         '400':
           description: Bad request due to invalid ID, malformed JSON, or validation error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/Response'
         '404':
           description: Car not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/Response'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/Response'
 
 components:
   schemas:
@@ -170,12 +170,14 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/Car"
-    ErrorResponse:
+    Response:
       type: object
       properties:
+        data:
+          description: The response data.
+          oneOf:
+            - $ref: "#/components/schemas/Car"
+            - $ref: "#/components/schemas/Cars"
         error:
           type: string
-          description: Response status description.
-        message:
-          type: string
-          description: Error message.
+          description: Error message or empty if no error.
