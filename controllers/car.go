@@ -3,7 +3,7 @@ package controllers
 import (
 	"cars/models"
 	e "cars/pkg/errors"
-	httpx "cars/pkg/htmlx"
+	"cars/pkg/httpx"
 	"cars/pkg/logger"
 	"cars/services"
 	"encoding/json"
@@ -122,7 +122,7 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	var car models.Car
 	if err := json.NewDecoder(r.Body).Decode(&car); err != nil {
 		log.Printf("[ERROR] Invalid request body: %v", err)
-		httpx.Error(w, http.StatusBadRequest, err.Error())
+		httpx.Error(w, http.StatusBadRequest, e.ErrInvalidRequestBody.Error())
 		return
 	}
 
