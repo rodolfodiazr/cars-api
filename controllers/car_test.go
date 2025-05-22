@@ -1,7 +1,3 @@
-/*
-I have these tests, but I am thinking that is not good idea to have the same implementation in my mock interfaces, that does not make sense I think, while I believe It would be good to add mock response or something in every test case, but that is only an idea, do you know a better approach?
-*/
-
 package controllers
 
 import (
