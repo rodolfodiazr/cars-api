@@ -2,7 +2,9 @@ package logger
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
 )
 
 type ctxKey string
@@ -10,8 +12,14 @@ type ctxKey string
 const loggerKey ctxKey = "logger"
 
 // WithLogger adds a logger to the context
-func WithLogger(ctx context.Context) context.Context {
-	return context.WithValue(ctx, loggerKey, log.Default())
+func WithLogger(r *http.Request) context.Context {
+	prefix := fmt.Sprintf("[method:%s path:%s] ",
+		r.Method,
+		r.URL.Path,
+	)
+
+	logger := log.New(log.Writer(), prefix, log.LstdFlags)
+	return context.WithValue(r.Context(), loggerKey, logger)
 }
 
 // FromContext retrieves the logger from the context
