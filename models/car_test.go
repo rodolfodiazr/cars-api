@@ -3,9 +3,12 @@ package models
 import (
 	"errors"
 	"testing"
+	"time"
 )
 
 func Test_Car_Validate(t *testing.T) {
+	currentYear := time.Now().Year()
+
 	tCases := []struct {
 		name          string
 		car           Car
@@ -15,7 +18,7 @@ func Test_Car_Validate(t *testing.T) {
 			name: "make is not defined",
 			car: Car{
 				ID:       "C001",
-				Model:    "Onix",
+				Model:    "Chevrolet",
 				Category: "Sedan",
 				Color:    "Red",
 				Year:     2025,
@@ -67,9 +70,21 @@ func Test_Car_Validate(t *testing.T) {
 			expectedError: errors.New("year is not valid"),
 		},
 		{
-			name: "All necessary properties are defined",
+			name: "year is not defined",
 			car: Car{
 				ID:       "C006",
+				Make:     "Toyota",
+				Model:    "Corolla",
+				Category: "Sedan",
+				Color:    "Silver",
+				Year:     currentYear + 10,
+			},
+			expectedError: errors.New("year is not valid"),
+		},
+		{
+			name: "All necessary properties are defined",
+			car: Car{
+				ID:       "C007",
 				Make:     "Suzuki",
 				Model:    "Swift",
 				Category: "Sedan",

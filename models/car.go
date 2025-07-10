@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"strings"
+	"time"
 )
 
 // Car represents a vehicle with various attributes such as make, model, package, color, category, year, mileage, and price.
@@ -41,7 +42,8 @@ func (c *Car) Validate() error {
 		return errors.New("category is required")
 	}
 
-	if c.Year <= 0 {
+	currentYear := time.Now().Year()
+	if c.Year <= 0 || c.Year > currentYear {
 		return errors.New("year is not valid")
 	}
 	return nil
