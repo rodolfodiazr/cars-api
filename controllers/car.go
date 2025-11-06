@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -60,7 +61,20 @@ func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	cars, err := c.service.List()
+	// Extract filters from query params
+	filters := models.CarFilters{
+		Make:  r.URL.Query().Get("make"),
+		Model: r.URL.Query().Get("model"),
+		Year:  0,
+	}
+
+	if yearStr := r.URL.Query().Get("year"); yearStr != "" {
+		if y, err := strconv.Atoi(yearStr); err == nil {
+			filters.Year = y
+		}
+	}
+
+	cars, err := c.service.List(filters)
 	if err != nil {
 		log.Printf("[ERROR] Failed to retrieve car list: %v", err)
 		httpx.Error(w, http.StatusInternalServerError, err.Error())

@@ -3,12 +3,13 @@ package services
 import (
 	"cars/models"
 	"cars/repositories"
+	"strings"
 )
 
 // CarService defines available operations for managing cars.
 type CarService interface {
 	Find(id string) (models.Car, error)
-	List() (models.Cars, error)
+	List(filters models.CarFilters) (models.Cars, error)
 	Create(car *models.Car) error
 	Update(car *models.Car) error
 }
@@ -31,8 +32,27 @@ func (s *DefaultCarService) Find(id string) (models.Car, error) {
 }
 
 // List retrieves all available cars.
-func (s *DefaultCarService) List() (models.Cars, error) {
-	return s.repo.List()
+func (s *DefaultCarService) List(f models.CarFilters) (models.Cars, error) {
+	allCars, err := s.repo.List()
+	if err != nil {
+		return nil, err
+	}
+
+	var filtered models.Cars
+	for _, car := range allCars {
+		if f.Make != "" && !strings.EqualFold(car.Make, f.Make) {
+			continue
+		}
+		if f.Model != "" && !strings.EqualFold(car.Model, f.Model) {
+			continue
+		}
+		if f.Year != 0 && car.Year != f.Year {
+			continue
+		}
+		filtered = append(filtered, car)
+	}
+
+	return filtered, nil
 }
 
 // Create adds a new car to the repository.
