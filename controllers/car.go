@@ -61,17 +61,11 @@ func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	// Extract filters from query params
-	filters := models.CarFilters{
-		Make:  r.URL.Query().Get("make"),
-		Model: r.URL.Query().Get("model"),
-		Year:  0,
-	}
-
-	if yearStr := r.URL.Query().Get("year"); yearStr != "" {
-		if y, err := strconv.Atoi(yearStr); err == nil {
-			filters.Year = y
-		}
+	filters, err := c.parseCarFilters(r)
+	if err != nil {
+		log.Printf("[ERROR] Invalid params: %v", err)
+		httpx.Error(w, http.StatusBadRequest, err.Error())
+		return
 	}
 
 	cars, err := c.service.List(filters)
@@ -176,4 +170,21 @@ func (c *CarController) getIDFromURL(r *http.Request) string {
 		return ""
 	}
 	return id
+}
+
+// parseCarFilters converts URL query parameters into a CarFilters struct.
+func (c *CarController) parseCarFilters(r *http.Request) (models.CarFilters, error) {
+	var filters models.CarFilters
+
+	filters.Make = r.URL.Query().Get("make")
+	filters.Model = r.URL.Query().Get("model")
+
+	if yearStr := r.URL.Query().Get("year"); yearStr != "" {
+		year, err := strconv.Atoi(yearStr)
+		if err != nil {
+			return filters, fmt.Errorf("invalid year: %q", yearStr)
+		}
+		filters.Year = year
+	}
+	return filters, nil
 }

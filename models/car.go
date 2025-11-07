@@ -21,12 +21,6 @@ type Car struct {
 	Price   float64 `json:"price,omitempty"`   // Price of the car in cents.
 }
 
-type CarFilters struct {
-	Make  string
-	Model string
-	Year  int
-}
-
 // Cars represents a collection of Car objects.
 type Cars []Car
 
