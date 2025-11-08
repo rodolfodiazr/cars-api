@@ -4,12 +4,13 @@ import (
 	"cars/models"
 	e "cars/pkg/errors"
 	"cars/pkg/utils"
+	"strings"
 )
 
 // CarRepository defines methods for managing car persistence.
 type CarRepository interface {
 	Find(id string) (models.Car, error)
-	List() (models.Cars, error)
+	List(filters models.CarFilters) (models.Cars, error)
 	Create(car *models.Car) error
 	Update(car *models.Car) error
 }
@@ -37,9 +38,18 @@ func (r *DefaultCarRepository) Find(id string) (models.Car, error) {
 }
 
 // List returns all stored cars.
-func (r *DefaultCarRepository) List() (models.Cars, error) {
+func (r *DefaultCarRepository) List(f models.CarFilters) (models.Cars, error) {
 	var list models.Cars
 	for _, car := range r.cars {
+		if f.Make != "" && !strings.EqualFold(car.Make, f.Make) {
+			continue
+		}
+		if f.Model != "" && !strings.EqualFold(car.Model, f.Model) {
+			continue
+		}
+		if f.Year != 0 && car.Year != f.Year {
+			continue
+		}
 		list = append(list, car)
 	}
 	return list, nil
