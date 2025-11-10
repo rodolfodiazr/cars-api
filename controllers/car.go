@@ -134,6 +134,11 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if car.ID != "" && car.ID != id {
+		httpx.Error(w, http.StatusBadRequest, e.ErrBodyIDMismatch.Error())
+		return
+	}
+
 	if err := car.Validate(); err != nil {
 		log.Printf("[ERROR] Validation error: %v", err)
 		httpx.Error(w, http.StatusBadRequest, err.Error())
