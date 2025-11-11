@@ -22,6 +22,10 @@ type DefaultCarRepository struct {
 
 // NewCarRepository creates a new instance of DefaultCarRepository with initial data.
 func NewCarRepository(initialData map[string]models.Car) CarRepository {
+	if initialData == nil {
+		initialData = make(map[string]models.Car)
+	}
+
 	repo := &DefaultCarRepository{
 		cars: initialData,
 	}
