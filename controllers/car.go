@@ -28,10 +28,10 @@ func NewCarController(service services.CarService) *CarController {
 func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	id := c.getIDFromURL(r)
-	if id == "" {
-		log.Println("[ERROR] Car ID is required")
-		httpx.Error(w, http.StatusBadRequest, e.ErrIDIsRequired.Error())
+	id, err := c.getIDFromURL(r)
+	if err != nil {
+		log.Printf("[ERROR] %v", err)
+		httpx.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -120,10 +120,10 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	id := c.getIDFromURL(r)
-	if id == "" {
-		log.Println("[ERROR] Car ID is required")
-		httpx.Error(w, http.StatusBadRequest, e.ErrIDIsRequired.Error())
+	id, err := c.getIDFromURL(r)
+	if err != nil {
+		log.Printf("[ERROR] %v", err)
+		httpx.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -168,13 +168,15 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 // getIDFromURL extracts the car ID from the request URL.
-func (c *CarController) getIDFromURL(r *http.Request) string {
-	id := strings.TrimPrefix(r.URL.Path, "/cars/")
-	if strings.Contains(id, "/") || id == "" {
-		fmt.Println("ID: ", id)
-		return ""
+func (c *CarController) getIDFromURL(r *http.Request) (string, error) {
+	path := strings.Trim(r.URL.Path, "/")
+	parts := strings.Split(path, "/")
+
+	if len(parts) != 2 || parts[0] != "cars" {
+		return "", e.ErrInvalidCarPathFormat
 	}
-	return id
+
+	return parts[1], nil
 }
 
 // parseCarFilters converts URL query parameters into a CarFilters struct.
