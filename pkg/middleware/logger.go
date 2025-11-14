@@ -19,23 +19,49 @@ type responseWriter struct {
 }
 
 func (rw *responseWriter) WriteHeader(code int) {
-	rw.statusCode = code
+	if rw.statusCode == 0 {
+		rw.statusCode = code
+	}
 	rw.ResponseWriter.WriteHeader(code)
+}
+
+func (rw *responseWriter) Write(b []byte) (int, error) {
+	if rw.statusCode == 0 {
+		rw.statusCode = http.StatusOK
+	}
+	return rw.ResponseWriter.Write(b)
 }
 
 func Logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		id := uuid.NewString()
 
-		ctx := context.WithValue(r.Context(), requestIDKey, id)
-		ctx = logger.WithLogger(r.WithContext(ctx))
+		reqID := uuid.NewString()
 
-		rw := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
-		next.ServeHTTP(rw, r.WithContext(ctx))
+		// 1) Put request ID into context
+		ctx := context.WithValue(r.Context(), requestIDKey, reqID)
+		r = r.WithContext(ctx)
+
+		// 2) logger.WithLogger RETURNS context.Context, NOT *http.Request
+		ctx = logger.WithLogger(r)
+
+		// 3) Rebuild request with updated context
+		r = r.WithContext(ctx)
+
+		// 4) Wrap response writer
+		rw := &responseWriter{ResponseWriter: w}
+
+		next.ServeHTTP(rw, r)
 
 		duration := time.Since(start)
 		log := logger.FromContext(ctx)
-		log.Printf("[req:%s] %d %s %s (%v)", id, rw.statusCode, r.Method, r.URL.Path, duration)
+
+		log.Printf("[req:%s] %d %s %s (%v)",
+			reqID,
+			rw.statusCode,
+			r.Method,
+			r.URL.Path,
+			duration,
+		)
 	})
 }
