@@ -95,6 +95,11 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if car.ID != "" {
+		httpx.Error(w, http.StatusBadRequest, e.ErrIDNotAllowedOnCreate.Error())
+		return
+	}
+
 	if err := car.Validate(); err != nil {
 		log.Printf("[ERROR] Validation error: %v", err)
 		httpx.Error(w, http.StatusBadRequest, err.Error())

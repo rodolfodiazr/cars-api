@@ -34,7 +34,7 @@ var data = map[string]models.Car{
 	"DKU43920S": {
 		ID:   "DKU43920S",
 		Make: "Ford", Model: "Bronco", Package: "Badlands",
-		Color: "Bumt Orange", Year: 2022, Category: "SUV",
+		Color: "Burnt Orange", Year: 2022, Category: "SUV",
 		Mileage: 1, Price: 4499000,
 	},
 }

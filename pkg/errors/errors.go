@@ -8,6 +8,7 @@ var (
 	ErrEncodingResponse     = errors.New("failed to encode response")
 	ErrMethodNotAllowed     = errors.New("method not allowed")
 	ErrBodyIDMismatch       = errors.New("ID in body does not match URL ID")
+	ErrIDNotAllowedOnCreate = errors.New("ID must not be provided when creating")
 	ErrInvalidCarPathFormat = errors.New("invalid path format: expected /cars/{id}")
 )
 
