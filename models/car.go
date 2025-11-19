@@ -25,7 +25,7 @@ type Car struct {
 type Cars []Car
 
 // Validate checks that all required fields in the Car struct are present and valid.
-func (c *Car) Validate() error {
+func (c Car) Validate() error {
 	if strings.TrimSpace(c.Make) == "" {
 		return errors.New("make is required")
 	}

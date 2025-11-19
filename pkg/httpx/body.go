@@ -20,3 +20,21 @@ func DecodeJSON(r *http.Request, v any) error {
 
 	return nil
 }
+
+// DecodeAndValidate decodes JSON and calls Validate() if the struct has it.
+type Validatable interface {
+	Validate() error
+}
+
+func DecodeAndValidate[T Validatable](r *http.Request) (*T, error) {
+	var obj T
+	if err := DecodeJSON(r, &obj); err != nil {
+		return nil, err
+	}
+
+	if err := obj.Validate(); err != nil {
+		return nil, err
+	}
+
+	return &obj, nil
+}

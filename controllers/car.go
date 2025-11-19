@@ -88,10 +88,10 @@ func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	var car models.Car
-	if err := httpx.DecodeJSON(r, car); err != nil {
-		log.Printf("[ERROR] Invalid request body: %v", err)
-		httpx.Error(w, http.StatusBadRequest, e.ErrInvalidRequestBody.Error())
+	car, err := httpx.DecodeAndValidate[models.Car](r)
+	if err != nil {
+		log.Printf("[ERROR] Invalid car payload: %v", err)
+		httpx.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -100,13 +100,7 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := car.Validate(); err != nil {
-		log.Printf("[ERROR] Validation error: %v", err)
-		httpx.Error(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err := c.service.Create(&car); err != nil {
+	if err := c.service.Create(car); err != nil {
 		log.Printf("[ERROR] Failed to create car: %v", err)
 		httpx.Error(w, http.StatusInternalServerError, err.Error())
 		return
