@@ -95,13 +95,13 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if car.ID != "" {
-		httpx.Error(w, http.StatusBadRequest, e.ErrIDNotAllowedOnCreate.Error())
-		return
-	}
-
 	if err := c.service.Create(car); err != nil {
 		log.Printf("[ERROR] Failed to create car: %v", err)
+		if errors.Is(err, e.ErrIDNotAllowedOnCreate) {
+			httpx.Error(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
 		httpx.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}

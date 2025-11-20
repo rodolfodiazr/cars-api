@@ -2,6 +2,7 @@ package services
 
 import (
 	"cars/models"
+	e "cars/pkg/errors"
 	"cars/repositories"
 )
 
@@ -37,6 +38,10 @@ func (s *DefaultCarService) List(f models.CarFilters) (models.Cars, error) {
 
 // Create adds a new car to the repository.
 func (s *DefaultCarService) Create(car *models.Car) error {
+	if car.ID != "" {
+		return e.ErrIDNotAllowedOnCreate
+	}
+
 	return s.repo.Create(car)
 }
 
