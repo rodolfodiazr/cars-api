@@ -35,7 +35,7 @@ func (s *DefaultCarService) Find(id string) (models.Car, error) {
 			return models.Car{}, e.NewCarNotFoundError(err)
 		}
 
-		return models.Car{}, e.NewInternalServiceError(err)
+		return models.Car{}, err
 	}
 
 	return car, nil
@@ -49,7 +49,7 @@ func (s *DefaultCarService) List(f models.CarFilters) (models.Cars, error) {
 // Create adds a new car to the repository.
 func (s *DefaultCarService) Create(car *models.Car) error {
 	if car.ID != "" {
-		return e.ErrIDNotAllowedOnCreate
+		return e.NewIDNotAllowedOnCreateError(e.ErrIDNotAllowedOnCreate)
 	}
 
 	return s.repo.Create(car)

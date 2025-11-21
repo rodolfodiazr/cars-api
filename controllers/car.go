@@ -7,7 +7,6 @@ import (
 	"cars/pkg/logger"
 	"cars/services"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -91,11 +90,6 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 
 	if err := c.service.Create(car); err != nil {
 		log.Printf("[ERROR] Failed to create car: %v", err)
-		if errors.Is(err, e.ErrIDNotAllowedOnCreate) {
-			httpx.HandleServiceError(w, err)
-			return
-		}
-
 		httpx.HandleServiceError(w, err)
 		return
 	}
@@ -140,12 +134,6 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 
 	car.ID = id // Put Car ID in the struct
 	if err := c.service.Update(&car); err != nil {
-		if errors.Is(err, e.ErrCarNotFound) {
-			log.Printf("[ERROR] Car not found: Car ID: %v", id)
-			httpx.HandleServiceError(w, err)
-			return
-		}
-
 		log.Printf("[ERROR] Failed to update car: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
@@ -166,7 +154,7 @@ func (c *CarController) getIDFromURL(r *http.Request) (string, error) {
 	parts := strings.Split(path, "/")
 
 	if len(parts) != 2 || parts[0] != "cars" {
-		return "", e.ErrInvalidCarPathFormat
+		return "", e.NewInvalidCarPathError(e.ErrInvalidCarPathFormat)
 	}
 
 	return parts[1], nil

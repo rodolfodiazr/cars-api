@@ -1,6 +1,7 @@
 package httpx
 
 import (
+	e "cars/pkg/errors"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -29,11 +30,11 @@ type Validatable interface {
 func DecodeAndValidate[T Validatable](r *http.Request) (*T, error) {
 	var obj T
 	if err := DecodeJSON(r, &obj); err != nil {
-		return nil, err
+		return nil, e.NewInvalidRequestBodyError(err)
 	}
 
 	if err := obj.Validate(); err != nil {
-		return nil, err
+		return nil, e.NewInvalidRequestBodyError(err)
 	}
 
 	return &obj, nil

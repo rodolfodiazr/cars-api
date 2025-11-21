@@ -16,10 +16,6 @@ func NewInvalidRequestBodyError(err error) *ServiceError {
 	return wrap(CodeInvalidRequestBody, http.StatusBadRequest, MsgInvalidRequestBody, err)
 }
 
-func NewEncodingResponseError(err error) *ServiceError {
-	return wrap(CodeEncodingResponse, http.StatusInternalServerError, MsgEncodingResponse, err)
-}
-
 func NewMethodNotAllowedError(err error) *ServiceError {
 	return wrap(CodeMethodNotAllowed, http.StatusMethodNotAllowed, MsgMethodNotAllowed, err)
 }
@@ -30,10 +26,6 @@ func NewBodyIDMismatchError(err error) *ServiceError {
 
 func NewIDNotAllowedOnCreateError(err error) *ServiceError {
 	return wrap(CodeIDNotAllowedOnCreate, http.StatusBadRequest, MsgIDNotAllowedOnCreate, err)
-}
-
-func NewInternalServiceError(err error) *ServiceError {
-	return wrap(CodeInternalError, http.StatusInternalServerError, MsgInternalError, err)
 }
 
 // Car-Specific Errors

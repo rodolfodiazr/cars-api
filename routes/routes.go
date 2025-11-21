@@ -4,9 +4,11 @@ import (
 	"cars/controllers"
 	"cars/data"
 	e "cars/pkg/errors"
+	"cars/pkg/httpx"
 	"cars/pkg/middleware"
 	"cars/repositories"
 	"cars/services"
+	"fmt"
 	"net/http"
 )
 
@@ -38,7 +40,9 @@ func handleCars(cars *controllers.CarController) http.HandlerFunc {
 		case http.MethodPost:
 			cars.Create(w, r)
 		default:
-			http.Error(w, e.ErrMethodNotAllowed.Error(), http.StatusMethodNotAllowed)
+			httpx.HandleServiceError(w, e.NewMethodNotAllowedError(
+				fmt.Errorf("method %s not allowed", r.Method),
+			))
 		}
 	}
 }
@@ -51,7 +55,9 @@ func handleCarByID(cars *controllers.CarController) http.HandlerFunc {
 		case http.MethodPut:
 			cars.Update(w, r)
 		default:
-			http.Error(w, e.ErrMethodNotAllowed.Error(), http.StatusMethodNotAllowed)
+			httpx.HandleServiceError(w, e.NewMethodNotAllowedError(
+				fmt.Errorf("method %s not allowed", r.Method),
+			))
 		}
 	}
 }
