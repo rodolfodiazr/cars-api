@@ -1,11 +1,17 @@
 package httpx
 
 import (
+	e "cars/pkg/errors"
 	"encoding/json"
+	"errors"
 	"net/http"
 )
 
-// Response represents the structure of a response.
+type ErrorResponse struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
 type Response struct {
 	Data  any    `json:"data,omitempty"`
 	Error string `json:"error,omitempty"`
@@ -19,10 +25,23 @@ func JSON(w http.ResponseWriter, code int, payload any) error {
 	})
 }
 
-func Error(w http.ResponseWriter, code int, message string) {
+func errorMessage(w http.ResponseWriter, status int, code, message string) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(Response{
-		Error: message,
+	w.WriteHeader(status)
+
+	json.NewEncoder(w).Encode(ErrorResponse{
+		Code:    code,
+		Message: message,
 	})
+}
+
+func HandleServiceError(w http.ResponseWriter, err error) {
+	var serviceError *e.ServiceError
+
+	if errors.As(err, &serviceError) {
+		errorMessage(w, serviceError.StatusCode, serviceError.Code, serviceError.Message)
+		return
+	}
+
+	errorMessage(w, http.StatusInternalServerError, "INTERNAL_ERROR", "Internal server error")
 }

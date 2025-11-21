@@ -31,26 +31,20 @@ func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 	id, err := c.getIDFromURL(r)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
-		httpx.Error(w, http.StatusBadRequest, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	car, err := c.service.Find(id)
 	if err != nil {
-		if errors.Is(err, e.ErrCarNotFound) {
-			log.Printf("[ERROR] Car not found: Car ID: %v", id)
-			httpx.Error(w, http.StatusNotFound, err.Error())
-			return
-		}
-
 		log.Printf("[ERROR] Failed to retrieve car: %v", err)
-		httpx.Error(w, http.StatusInternalServerError, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	if err := httpx.JSON(w, http.StatusOK, car); err != nil {
 		log.Printf("[ERROR] Failed to encode car response: %v", err)
-		httpx.Error(w, http.StatusInternalServerError, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
@@ -64,20 +58,20 @@ func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 	filters, err := c.parseCarFilters(r)
 	if err != nil {
 		log.Printf("[ERROR] Invalid params: %v", err)
-		httpx.Error(w, http.StatusBadRequest, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	cars, err := c.service.List(filters)
 	if err != nil {
 		log.Printf("[ERROR] Failed to retrieve car list: %v", err)
-		httpx.Error(w, http.StatusInternalServerError, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	if err := httpx.JSON(w, http.StatusOK, cars); err != nil {
 		log.Printf("[ERROR] Failed to encode car list response: %v", err)
-		httpx.Error(w, http.StatusInternalServerError, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
@@ -91,24 +85,24 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 	car, err := httpx.DecodeAndValidate[models.Car](r)
 	if err != nil {
 		log.Printf("[ERROR] Invalid car payload: %v", err)
-		httpx.Error(w, http.StatusBadRequest, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	if err := c.service.Create(car); err != nil {
 		log.Printf("[ERROR] Failed to create car: %v", err)
 		if errors.Is(err, e.ErrIDNotAllowedOnCreate) {
-			httpx.Error(w, http.StatusBadRequest, err.Error())
+			httpx.HandleServiceError(w, err)
 			return
 		}
 
-		httpx.Error(w, http.StatusInternalServerError, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	if err := httpx.JSON(w, http.StatusCreated, car); err != nil {
 		log.Printf("[ERROR] Failed to encode created car response: %v", err)
-		httpx.Error(w, http.StatusInternalServerError, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
@@ -122,25 +116,25 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := c.getIDFromURL(r)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
-		httpx.Error(w, http.StatusBadRequest, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	var car models.Car
 	if err := json.NewDecoder(r.Body).Decode(&car); err != nil {
 		log.Printf("[ERROR] Invalid request body: %v", err)
-		httpx.Error(w, http.StatusBadRequest, e.ErrInvalidRequestBody.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	if car.ID != "" && car.ID != id {
-		httpx.Error(w, http.StatusBadRequest, e.ErrBodyIDMismatch.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	if err := car.Validate(); err != nil {
 		log.Printf("[ERROR] Validation error: %v", err)
-		httpx.Error(w, http.StatusBadRequest, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
@@ -148,18 +142,18 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	if err := c.service.Update(&car); err != nil {
 		if errors.Is(err, e.ErrCarNotFound) {
 			log.Printf("[ERROR] Car not found: Car ID: %v", id)
-			httpx.Error(w, http.StatusNotFound, err.Error())
+			httpx.HandleServiceError(w, err)
 			return
 		}
 
 		log.Printf("[ERROR] Failed to update car: %v", err)
-		httpx.Error(w, http.StatusInternalServerError, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	if err := httpx.JSON(w, http.StatusOK, car); err != nil {
 		log.Printf("[ERROR] Failed to encode updated car response: %v", err)
-		httpx.Error(w, http.StatusInternalServerError, err.Error())
+		httpx.HandleServiceError(w, err)
 		return
 	}
 

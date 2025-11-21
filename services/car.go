@@ -4,6 +4,7 @@ import (
 	"cars/models"
 	e "cars/pkg/errors"
 	"cars/repositories"
+	"errors"
 )
 
 // CarService defines available operations for managing cars.
@@ -28,7 +29,16 @@ func NewCarService(repo repositories.CarRepository) CarService {
 
 // Find retrieves a car by its ID if it exists.
 func (s *DefaultCarService) Find(id string) (models.Car, error) {
-	return s.repo.Find(id)
+	car, err := s.repo.Find(id)
+	if err != nil {
+		if errors.Is(err, e.ErrCarNotFound) {
+			return models.Car{}, e.NewCarNotFoundError(err)
+		}
+
+		return models.Car{}, e.NewInternalServiceError(err)
+	}
+
+	return car, nil
 }
 
 // List retrieves all available cars.
