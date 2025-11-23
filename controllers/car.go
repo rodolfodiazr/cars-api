@@ -6,7 +6,6 @@ import (
 	"cars/pkg/httpx"
 	"cars/pkg/logger"
 	"cars/services"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -114,26 +113,17 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var car models.Car
-	if err := json.NewDecoder(r.Body).Decode(&car); err != nil {
-		log.Printf("[ERROR] Invalid request body: %v", err)
+	car, err := httpx.DecodeAndValidate[models.Car](r)
+	if err != nil {
+		log.Printf("[ERROR] Invalid car payload: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
-	if car.ID != "" && car.ID != id {
-		httpx.HandleServiceError(w, err)
-		return
-	}
+	car.BodyID = car.ID // Preserve original
+	car.ID = id         // Override with URL ID
 
-	if err := car.Validate(); err != nil {
-		log.Printf("[ERROR] Validation error: %v", err)
-		httpx.HandleServiceError(w, err)
-		return
-	}
-
-	car.ID = id // Put Car ID in the struct
-	if err := c.service.Update(&car); err != nil {
+	if err := c.service.Update(car); err != nil {
 		log.Printf("[ERROR] Failed to update car: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
@@ -154,7 +144,7 @@ func (c *CarController) getIDFromURL(r *http.Request) (string, error) {
 	parts := strings.Split(path, "/")
 
 	if len(parts) != 2 || parts[0] != "cars" {
-		return "", e.NewInvalidCarPathError(e.ErrInvalidCarPathFormat)
+		return "", e.NewInvalidCarPathError()
 	}
 
 	return parts[1], nil

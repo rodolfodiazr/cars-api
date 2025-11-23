@@ -5,9 +5,6 @@ const (
 	CodeInvalidRequestBody = "INVALID_REQUEST_BODY"
 	MsgInvalidRequestBody  = "Invalid request body"
 
-	CodeEncodingResponse = "ENCODING_RESPONSE_FAILED"
-	MsgEncodingResponse  = "Failed to encode response"
-
 	CodeMethodNotAllowed = "METHOD_NOT_ALLOWED"
 	MsgMethodNotAllowed  = "Method not allowed"
 
@@ -16,9 +13,6 @@ const (
 
 	CodeIDNotAllowedOnCreate = "ID_NOT_ALLOWED_ON_CREATE"
 	MsgIDNotAllowedOnCreate  = "ID must not be provided when creating a new record"
-
-	CodeInternalError = "INTERNAL_ERROR"
-	MsgInternalError  = "Internal server error"
 
 	// Car-Specific Errors
 	CodeCarNotFound = "CAR_NOT_FOUND"

@@ -12,24 +12,24 @@ type errorResponse struct {
 	Message string `json:"message"`
 }
 
-type response struct {
-	Data  any    `json:"data,omitempty"`
-	Error string `json:"error,omitempty"`
+type successResponse struct {
+	Data any `json:"data,omitempty"`
 }
 
-func JSON(w http.ResponseWriter, code int, payload any) error {
+func JSON(w http.ResponseWriter, status int, payload any) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	return json.NewEncoder(w).Encode(response{
+	w.WriteHeader(status)
+
+	return json.NewEncoder(w).Encode(successResponse{
 		Data: payload,
 	})
 }
 
-func errorMessage(w http.ResponseWriter, status int, code, message string) {
+func writeError(w http.ResponseWriter, status int, code, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
-	json.NewEncoder(w).Encode(errorResponse{
+	_ = json.NewEncoder(w).Encode(errorResponse{
 		Code:    code,
 		Message: message,
 	})
@@ -39,9 +39,9 @@ func HandleServiceError(w http.ResponseWriter, err error) {
 	var serviceError *e.ServiceError
 
 	if errors.As(err, &serviceError) {
-		errorMessage(w, serviceError.StatusCode, serviceError.Code, serviceError.Message)
+		writeError(w, serviceError.StatusCode, serviceError.Code, serviceError.Message)
 		return
 	}
 
-	errorMessage(w, http.StatusInternalServerError, "INTERNAL_ERROR", "Internal server error")
+	writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "Internal server error")
 }

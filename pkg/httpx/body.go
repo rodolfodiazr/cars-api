@@ -3,6 +3,7 @@ package httpx
 import (
 	e "cars/pkg/errors"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -10,9 +11,8 @@ import (
 // DecodeJSON decodes request body JSON into the provided struct.
 func DecodeJSON(r *http.Request, v any) error {
 	if r.Body == nil {
-		return fmt.Errorf("request body is empty")
+		return errors.New("request body is empty")
 	}
-
 	defer r.Body.Close()
 
 	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
@@ -22,11 +22,11 @@ func DecodeJSON(r *http.Request, v any) error {
 	return nil
 }
 
-// DecodeAndValidate decodes JSON and calls Validate() if the struct has it.
 type Validatable interface {
 	Validate() error
 }
 
+// DecodeAndValidate decodes JSON and then validates the struct.
 func DecodeAndValidate[T Validatable](r *http.Request) (*T, error) {
 	var obj T
 	if err := DecodeJSON(r, &obj); err != nil {

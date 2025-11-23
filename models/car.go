@@ -8,7 +8,8 @@ import (
 
 // Car represents a vehicle with various attributes such as make, model, package, color, category, year, mileage, and price.
 type Car struct {
-	ID string `json:"id"` // Unique identifier for the car.
+	ID     string `json:"id"` // Unique identifier for the car.
+	BodyID string `json:"-"`
 
 	Make     string `json:"make"`              // Manufacturer of the car (e.g., Toyota, Ford).
 	Model    string `json:"model"`             // Model name of the car (e.g., Camry, F-10).
