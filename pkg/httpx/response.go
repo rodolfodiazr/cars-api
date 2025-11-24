@@ -7,12 +7,12 @@ import (
 	"net/http"
 )
 
-type errorResponse struct {
+type ErrorResponse struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 }
 
-type successResponse struct {
+type SuccessResponse struct {
 	Data any `json:"data,omitempty"`
 }
 
@@ -20,7 +20,7 @@ func JSON(w http.ResponseWriter, status int, payload any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
-	return json.NewEncoder(w).Encode(successResponse{
+	return json.NewEncoder(w).Encode(SuccessResponse{
 		Data: payload,
 	})
 }
@@ -29,7 +29,7 @@ func writeError(w http.ResponseWriter, status int, code, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
-	_ = json.NewEncoder(w).Encode(errorResponse{
+	_ = json.NewEncoder(w).Encode(ErrorResponse{
 		Code:    code,
 		Message: message,
 	})
