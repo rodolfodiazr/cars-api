@@ -1,174 +1,156 @@
 package controllers
 
-// import (
-// 	"cars/models"
-// 	e "cars/pkg/errors"
-// 	"cars/pkg/httpx"
-// 	"cars/services"
-// 	"encoding/json"
-// 	"errors"
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"testing"
-// )
+import (
+	"cars/models"
+	e "cars/pkg/errors"
+	"cars/pkg/httpx"
+	"cars/services"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"reflect"
+	"testing"
+)
 
-// type MockCarRepository struct {
-// 	FindFn   func(id string) (models.Car, error)
-// 	ListFn   func(filters models.CarFilters) (models.Cars, error)
-// 	CreateFn func(car *models.Car) error
-// 	UpdateFn func(car *models.Car) error
-// }
+type MockCarRepository struct {
+	FindFn   func(id string) (models.Car, error)
+	ListFn   func(filters models.CarFilters) (models.Cars, error)
+	CreateFn func(car *models.Car) error
+	UpdateFn func(car *models.Car) error
+}
 
-// func (m *MockCarRepository) Find(id string) (models.Car, error) {
-// 	return m.FindFn(id)
-// }
-// func (m *MockCarRepository) List(filters models.CarFilters) (models.Cars, error) {
-// 	return m.ListFn(filters)
-// }
-// func (m *MockCarRepository) Create(car *models.Car) error {
-// 	return m.CreateFn(car)
-// }
-// func (m *MockCarRepository) Update(car *models.Car) error {
-// 	return m.UpdateFn(car)
-// }
+func (m *MockCarRepository) Find(id string) (models.Car, error) {
+	return m.FindFn(id)
+}
+func (m *MockCarRepository) List(filters models.CarFilters) (models.Cars, error) {
+	return m.ListFn(filters)
+}
+func (m *MockCarRepository) Create(car *models.Car) error {
+	return m.CreateFn(car)
+}
+func (m *MockCarRepository) Update(car *models.Car) error {
+	return m.UpdateFn(car)
+}
 
-// func Test_Car_Get(t *testing.T) {
-// 	tCases := []struct {
-// 		name             string
-// 		idParam          string
-// 		findFn           func(id string) (models.Car, error)
-// 		expectedStatus   int
-// 		expectedResponse any
-// 	}{
-// 		{
-// 			name:             "missing param",
-// 			idParam:          "",
-// 			findFn:           nil,
-// 			expectedStatus:   http.StatusBadRequest,
-// 			expectedResponse: httpx.ErrorResponse{Message: "id is required"},
-// 		},
-// 		{
-// 			name:    "repository error",
-// 			idParam: "ABC123",
-// 			findFn: func(id string) (models.Car, error) {
-// 				return models.Car{}, errors.New("repository error")
-// 			},
-// 			expectedStatus:   http.StatusInternalServerError,
-// 			expectedResponse: httpx.ErrorResponse{Message: "repository error"},
-// 		},
-// 		{
-// 			name:    "car found",
-// 			idParam: "ABC123",
-// 			findFn: func(id string) (models.Car, error) {
-// 				return models.Car{
-// 					ID:       "ABC123",
-// 					Make:     "Chevrolet",
-// 					Model:    "Onix",
-// 					Color:    "Black",
-// 					Category: "Sedan",
-// 					Year:     2025,
-// 				}, nil
-// 			},
-// 			expectedStatus: http.StatusOK,
-// 			expectedResponse: httpx.SuccessResponse{
-// 				Data: models.Car{
-// 					ID:       "ABC123",
-// 					Make:     "Chevrolet",
-// 					Model:    "Onix",
-// 					Color:    "Black",
-// 					Category: "Sedan",
-// 					Year:     2025,
-// 				},
-// 			},
-// 		},
-// 		{
-// 			name:    "car not found",
-// 			idParam: "DEF456",
-// 			findFn: func(id string) (models.Car, error) {
-// 				return models.Car{}, e.ErrCarNotFound
-// 			},
-// 			expectedStatus:   http.StatusNotFound,
-// 			expectedResponse: httpx.ErrorResponse{Message: "car not found"},
-// 		},
-// 	}
+func Test_Car_Get(t *testing.T) {
+	tCases := []struct {
+		name             string
+		idParam          string
+		findFn           func(id string) (models.Car, error)
+		expectedStatus   int
+		expectedResponse any
+	}{
+		{
+			name:             "missing param",
+			idParam:          "",
+			findFn:           nil,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid path format: expected /cars/{id}"},
+		},
+		{
+			name:    "repository error",
+			idParam: "ABC123",
+			findFn: func(id string) (models.Car, error) {
+				return models.Car{}, errors.New("repository error")
+			},
+			expectedStatus:   http.StatusInternalServerError,
+			expectedResponse: httpx.ErrorResponse{Message: "Internal server error"},
+		},
+		{
+			name:    "car found",
+			idParam: "ABC123",
+			findFn: func(id string) (models.Car, error) {
+				return models.Car{
+					ID:       "ABC123",
+					Make:     "Chevrolet",
+					Model:    "Onix",
+					Color:    "Black",
+					Category: "Sedan",
+					Year:     2025,
+				}, nil
+			},
+			expectedStatus: http.StatusOK,
+			expectedResponse: httpx.SuccessResponse{
+				Data: models.Car{
+					ID:       "ABC123",
+					Make:     "Chevrolet",
+					Model:    "Onix",
+					Color:    "Black",
+					Category: "Sedan",
+					Year:     2025,
+				},
+			},
+		},
+		{
+			name:    "car not found",
+			idParam: "DEF456",
+			findFn: func(id string) (models.Car, error) {
+				return models.Car{}, e.ErrCarNotFound
+			},
+			expectedStatus:   http.StatusNotFound,
+			expectedResponse: httpx.ErrorResponse{Message: "Car not found"},
+		},
+	}
 
-// 	for _, tc := range tCases {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			controller := NewCarController(
-// 				services.NewCarService(
-// 					&MockCarRepository{
-// 						FindFn: tc.findFn,
-// 					},
-// 				),
-// 			)
+	for _, tc := range tCases {
+		t.Run(tc.name, func(t *testing.T) {
+			controller := NewCarController(
+				services.NewCarService(
+					&MockCarRepository{FindFn: tc.findFn},
+				),
+			)
 
-// 			req, err := http.NewRequest("GET", "/cars/"+tc.idParam, nil)
-// 			if err != nil {
-// 				t.Fatal(err)
-// 			}
+			resp := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/cars/"+tc.idParam, nil)
+			controller.Get(resp, req)
 
-// 			resp := httptest.NewRecorder()
-// 			http.HandlerFunc(controller.Get).ServeHTTP(resp, req)
-// 			if status := resp.Code; status != tc.expectedStatus {
-// 				t.Errorf("expected status %v, got %v", tc.expectedStatus, status)
-// 				return
-// 			}
+			// Check status code
+			if resp.Code != tc.expectedStatus {
+				t.Errorf("expected status %v, got %v", tc.expectedStatus, resp.Code)
+				return
+			}
 
-// 			if expectedBody, ok := tc.expectedResponse.(httpx.ErrorResponse); ok {
-// 				var respBody httpx.ErrorResponse
-// 				if err := json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-// 					t.Fatal(err)
-// 				}
+			// Check error response
+			if expected, ok := tc.expectedResponse.(httpx.ErrorResponse); ok {
+				var got httpx.ErrorResponse
+				if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
+					t.Fatal(err)
+					return
+				}
 
-// 				if respBody.Message != expectedBody.Message {
-// 					t.Errorf("expected error %v, got %v", expectedBody.Message, respBody.Message)
-// 				}
-// 				return
-// 			}
+				if got.Message != expected.Message {
+					t.Errorf("expected error %v, got %v", expected.Message, got.Message)
+				}
+				return
+			}
 
-// 			var respBody httpx.SuccessResponse
-// 			if err := json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-// 				t.Fatal(err)
-// 			}
+			// Check success response
+			var got httpx.SuccessResponse
+			if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
+				t.Fatal(err)
+				return
+			}
 
-// 			dataBytes, err := json.Marshal(respBody.Data)
-// 			if err != nil {
-// 				t.Fatal(err)
-// 			}
+			gotDataBytes, err := json.Marshal(got.Data)
+			if err != nil {
+				t.Fatal(err)
+				return
+			}
 
-// 			var car models.Car
-// 			if err := json.Unmarshal(dataBytes, &car); err != nil {
-// 				t.Fatal(err)
-// 			}
+			gotCar := models.Car{}
+			if err := json.Unmarshal(gotDataBytes, &gotCar); err != nil {
+				t.Fatal(err)
+				return
+			}
 
-// 			expectedBody, _ := tc.expectedResponse.(httpx.SuccessResponse)
-// 			expectedCar := expectedBody.Data.(models.Car)
-// 			if car.ID != expectedCar.ID {
-// 				t.Errorf("expected ID %v, got %v", expectedCar.ID, car.ID)
-// 			}
-
-// 			if car.Make != expectedCar.Make {
-// 				t.Errorf("expected make %v, got %v", expectedCar.Make, car.Make)
-// 			}
-
-// 			if car.Model != expectedCar.Model {
-// 				t.Errorf("expected model %v, got %v", expectedCar.Model, car.Model)
-// 			}
-
-// 			if car.Color != expectedCar.Color {
-// 				t.Errorf("expected color %v, got %v", expectedCar.Color, car.Color)
-// 			}
-
-// 			if car.Category != expectedCar.Category {
-// 				t.Errorf("expected category %v, got %v", expectedCar.Category, car.Category)
-// 			}
-
-// 			if car.Year != expectedCar.Year {
-// 				t.Errorf("expected year %v, got %v", expectedCar.Year, car.Year)
-// 			}
-// 		})
-// 	}
-// }
+			expectedCar, _ := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Car)
+			if !reflect.DeepEqual(gotCar, expectedCar) {
+				t.Errorf("expected car %+v, got %+v", expectedCar, gotCar)
+			}
+		})
+	}
+}
 
 // func Test_Car_List(t *testing.T) {
 // 	tCases := []struct {
