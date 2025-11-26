@@ -107,8 +107,7 @@ func Test_Car_Get(t *testing.T) {
 
 			// Check status code
 			if resp.Code != tc.expectedStatus {
-				t.Errorf("expected status %v, got %v", tc.expectedStatus, resp.Code)
-				return
+				t.Fatalf("expected status %v, got %v", tc.expectedStatus, resp.Code)
 			}
 
 			// Check error response
@@ -116,11 +115,10 @@ func Test_Car_Get(t *testing.T) {
 				var got httpx.ErrorResponse
 				if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
 					t.Fatal(err)
-					return
 				}
 
 				if got.Message != expected.Message {
-					t.Errorf("expected error %v, got %v", expected.Message, got.Message)
+					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
 				}
 				return
 			}
@@ -129,146 +127,121 @@ func Test_Car_Get(t *testing.T) {
 			var got httpx.SuccessResponse
 			if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
 				t.Fatal(err)
-				return
 			}
 
 			gotDataBytes, err := json.Marshal(got.Data)
 			if err != nil {
 				t.Fatal(err)
-				return
 			}
 
 			gotCar := models.Car{}
 			if err := json.Unmarshal(gotDataBytes, &gotCar); err != nil {
 				t.Fatal(err)
-				return
 			}
 
 			expectedCar, _ := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Car)
 			if !reflect.DeepEqual(gotCar, expectedCar) {
-				t.Errorf("expected car %+v, got %+v", expectedCar, gotCar)
+				t.Fatalf("expected car %+v, got %+v", expectedCar, gotCar)
 			}
 		})
 	}
 }
 
-// func Test_Car_List(t *testing.T) {
-// 	tCases := []struct {
-// 		name             string
-// 		listFn           func() (models.Cars, error)
-// 		expectedStatus   int
-// 		expectedResponse httpx.Response
-// 	}{
-// 		{
-// 			name: "list with 3 cars",
-// 			listFn: func() (models.Cars, error) {
-// 				return models.Cars{
-// 					{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: "ABC", Color: "Black", Category: "Sedan", Year: 2025},
-// 					{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: "DEF", Color: "Red", Category: "Sedan", Year: 2025},
-// 					{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: "GHI", Color: "White", Category: "Sedan", Year: 2025},
-// 				}, nil
-// 			},
-// 			expectedStatus: http.StatusOK,
-// 			expectedResponse: httpx.Response{
-// 				Data: models.Cars{
-// 					{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: "ABC", Color: "Black", Category: "Sedan", Year: 2025},
-// 					{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: "DEF", Color: "Red", Category: "Sedan", Year: 2025},
-// 					{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: "GHI", Color: "White", Category: "Sedan", Year: 2025},
-// 				},
-// 			},
-// 		},
-// 		{
-// 			name: "repository error",
-// 			listFn: func() (models.Cars, error) {
-// 				return nil, errors.New("repository error")
-// 			},
-// 			expectedStatus: http.StatusInternalServerError,
-// 			expectedResponse: httpx.Response{
-// 				Error: "repository error",
-// 			},
-// 		},
-// 	}
+func Test_Car_List(t *testing.T) {
+	tCases := []struct {
+		name             string
+		listFn           func(f models.CarFilters) (models.Cars, error)
+		expectedStatus   int
+		expectedResponse any
+	}{
+		{
+			name: "list with 3 cars",
+			listFn: func(f models.CarFilters) (models.Cars, error) {
+				return models.Cars{
+					{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: "ABC", Color: "Black", Category: "Sedan", Year: 2025},
+					{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: "DEF", Color: "Red", Category: "Sedan", Year: 2025},
+					{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: "GHI", Color: "White", Category: "Sedan", Year: 2025},
+				}, nil
+			},
+			expectedStatus: http.StatusOK,
+			expectedResponse: httpx.SuccessResponse{
+				Data: models.Cars{
+					{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: "ABC", Color: "Black", Category: "Sedan", Year: 2025},
+					{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: "DEF", Color: "Red", Category: "Sedan", Year: 2025},
+					{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: "GHI", Color: "White", Category: "Sedan", Year: 2025},
+				},
+			},
+		},
+		{
+			name: "repository error",
+			listFn: func(f models.CarFilters) (models.Cars, error) {
+				return nil, errors.New("repository error")
+			},
+			expectedStatus: http.StatusInternalServerError,
+			expectedResponse: httpx.ErrorResponse{
+				Message: "Internal server error",
+			},
+		},
+	}
 
-// 	for _, tc := range tCases {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			controller := NewCarController(
-// 				services.NewCarService(
-// 					&MockCarRepository{
-// 						ListFn: tc.listFn,
-// 					},
-// 				),
-// 			)
+	for _, tc := range tCases {
+		t.Run(tc.name, func(t *testing.T) {
+			controller := NewCarController(
+				services.NewCarService(
+					&MockCarRepository{ListFn: tc.listFn},
+				),
+			)
 
-// 			req, _ := http.NewRequest("GET", "/cars", nil)
-// 			resp := httptest.NewRecorder()
-// 			http.HandlerFunc(controller.List).ServeHTTP(resp, req)
+			resp := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/cars", nil)
 
-// 			if resp.Code != tc.expectedStatus {
-// 				t.Errorf("expected status %v, got %v", tc.expectedStatus, resp.Code)
-// 			}
+			controller.List(resp, req)
 
-// 			var respBody httpx.Response
-// 			if err := json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-// 				t.Fatal(err)
-// 			}
+			// Check status code
+			if resp.Code != tc.expectedStatus {
+				t.Fatalf("expected status %d, got %d", tc.expectedStatus, resp.Code)
+			}
 
-// 			if tc.expectedResponse.Error != "" {
-// 				if respBody.Error != tc.expectedResponse.Error {
-// 					t.Errorf("expected error %v, got %v", tc.expectedResponse.Error, respBody.Error)
-// 				}
-// 				return
-// 			}
+			// Check error response
+			if expected, ok := tc.expectedResponse.(httpx.ErrorResponse); ok {
+				var got httpx.ErrorResponse
+				if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
+					t.Fatal(err)
+				}
 
-// 			dataBytes, err := json.Marshal(respBody.Data)
-// 			if err != nil {
-// 				t.Fatal(err)
-// 			}
+				if got.Message != expected.Message {
+					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
+				}
+				return
+			}
 
-// 			var cars models.Cars
-// 			if err := json.Unmarshal(dataBytes, &cars); err != nil {
-// 				t.Fatal(err)
-// 			}
+			// Check success response
+			var got httpx.SuccessResponse
+			if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
+				t.Fatal(err)
+			}
 
-// 			expectedCars := tc.expectedResponse.Data.(models.Cars)
-// 			if len(cars) != len(expectedCars) {
-// 				t.Errorf("expected %d cars, got %d", len(expectedCars), len(cars))
-// 			}
+			gotDataBytes, err := json.Marshal(got.Data)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-// 			actualCars := make(map[string]models.Car)
-// 			for _, c := range cars {
-// 				actualCars[c.ID] = c
-// 			}
+			var gotCars models.Cars
+			if err := json.Unmarshal(gotDataBytes, &gotCars); err != nil {
+				t.Fatal(err)
+			}
 
-// 			for _, expected := range expectedCars {
-// 				got, ok := actualCars[expected.ID]
-// 				if !ok {
-// 					t.Errorf("expected car ID %s not found", expected.ID)
-// 					continue
-// 				}
+			expectedCars := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Cars)
+			if len(gotCars) != len(expectedCars) {
+				t.Fatalf("expected %d cars, got %d", len(expectedCars), len(gotCars))
+			}
 
-// 				if got.Make != expected.Make {
-// 					t.Errorf("expected make %v, got %v", expected.Make, got.Make)
-// 				}
-
-// 				if got.Model != expected.Model {
-// 					t.Errorf("expected model %v, got %v", expected.Model, got.Model)
-// 				}
-
-// 				if got.Color != expected.Color {
-// 					t.Errorf("expected color %v, got %v", expected.Color, got.Color)
-// 				}
-
-// 				if got.Category != expected.Category {
-// 					t.Errorf("expected category %v, got %v", expected.Category, got.Category)
-// 				}
-
-// 				if got.Year != expected.Year {
-// 					t.Errorf("expected year %v, got %v", expected.Year, got.Year)
-// 				}
-// 			}
-// 		})
-// 	}
-// }
+			if !reflect.DeepEqual(gotCars, expectedCars) {
+				t.Fatalf("expected cars %+v, got %+v", expectedCars, gotCars)
+			}
+		})
+	}
+}
 
 // func Test_Car_Create(t *testing.T) {
 // 	tCases := []struct {
