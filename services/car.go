@@ -61,5 +61,13 @@ func (s *DefaultCarService) Update(car *models.Car) error {
 		return e.NewBodyIDMismatchError()
 	}
 
-	return s.repo.Update(car)
+	if err := s.repo.Update(car); err != nil {
+		if errors.Is(err, e.ErrCarNotFound) {
+			return e.NewCarNotFoundError(err)
+		}
+
+		return err
+	}
+
+	return nil
 }
