@@ -44,9 +44,17 @@ func Test_Car_Get(t *testing.T) {
 	}{
 		{
 			name:             "missing param",
-			idParam:          "",
 			expectedStatus:   http.StatusBadRequest,
 			expectedResponse: httpx.ErrorResponse{Message: "Invalid path format: expected /cars/{id}"},
+		},
+		{
+			name:    "car not found",
+			idParam: "DEF456",
+			findFn: func(id string) (models.Car, error) {
+				return models.Car{}, e.ErrCarNotFound
+			},
+			expectedStatus:   http.StatusNotFound,
+			expectedResponse: httpx.ErrorResponse{Message: "Car not found"},
 		},
 		{
 			name:    "repository error",
@@ -81,15 +89,6 @@ func Test_Car_Get(t *testing.T) {
 					Year:     2025,
 				},
 			},
-		},
-		{
-			name:    "car not found",
-			idParam: "DEF456",
-			findFn: func(id string) (models.Car, error) {
-				return models.Car{}, e.ErrCarNotFound
-			},
-			expectedStatus:   http.StatusNotFound,
-			expectedResponse: httpx.ErrorResponse{Message: "Car not found"},
 		},
 	}
 
@@ -155,6 +154,14 @@ func Test_Car_List(t *testing.T) {
 		expectedResponse any
 	}{
 		{
+			name: "repository error",
+			listFn: func(f models.CarFilters) (models.Cars, error) {
+				return nil, errors.New("repository error")
+			},
+			expectedStatus:   http.StatusInternalServerError,
+			expectedResponse: httpx.ErrorResponse{Message: "Internal server error"},
+		},
+		{
 			name: "list with 3 cars",
 			listFn: func(f models.CarFilters) (models.Cars, error) {
 				return models.Cars{
@@ -170,16 +177,6 @@ func Test_Car_List(t *testing.T) {
 					{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: "DEF", Color: "Red", Category: "Sedan", Year: 2025},
 					{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: "GHI", Color: "White", Category: "Sedan", Year: 2025},
 				},
-			},
-		},
-		{
-			name: "repository error",
-			listFn: func(f models.CarFilters) (models.Cars, error) {
-				return nil, errors.New("repository error")
-			},
-			expectedStatus: http.StatusInternalServerError,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Internal server error",
 			},
 		},
 	}
@@ -201,42 +198,42 @@ func Test_Car_List(t *testing.T) {
 				t.Fatalf("expected status %d, got %d", tc.expectedStatus, resp.Code)
 			}
 
-			// Check error response
-			if expected, ok := tc.expectedResponse.(httpx.ErrorResponse); ok {
+			body := resp.Body.Bytes()
+
+			switch expected := tc.expectedResponse.(type) {
+			case httpx.ErrorResponse:
 				var got httpx.ErrorResponse
-				if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
+				if err := json.Unmarshal(body, &got); err != nil {
 					t.Fatal(err)
 				}
 
 				if got.Message != expected.Message {
 					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
 				}
-				return
-			}
+			case httpx.SuccessResponse:
+				var got httpx.SuccessResponse
+				if err := json.Unmarshal(body, &got); err != nil {
+					t.Fatal(err)
+				}
 
-			// Check success response
-			var got httpx.SuccessResponse
-			if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
-				t.Fatal(err)
-			}
+				gotDataBytes, err := json.Marshal(got.Data)
+				if err != nil {
+					t.Fatal(err)
+				}
 
-			gotDataBytes, err := json.Marshal(got.Data)
-			if err != nil {
-				t.Fatal(err)
-			}
+				var gotCars models.Cars
+				if err := json.Unmarshal(gotDataBytes, &gotCars); err != nil {
+					t.Fatal(err)
+				}
 
-			var gotCars models.Cars
-			if err := json.Unmarshal(gotDataBytes, &gotCars); err != nil {
-				t.Fatal(err)
-			}
+				expectedCars := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Cars)
+				if len(gotCars) != len(expectedCars) {
+					t.Fatalf("expected %d cars, got %d", len(expectedCars), len(gotCars))
+				}
 
-			expectedCars := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Cars)
-			if len(gotCars) != len(expectedCars) {
-				t.Fatalf("expected %d cars, got %d", len(expectedCars), len(gotCars))
-			}
-
-			if !reflect.DeepEqual(gotCars, expectedCars) {
-				t.Fatalf("expected cars %+v, got %+v", expectedCars, gotCars)
+				if !reflect.DeepEqual(gotCars, expectedCars) {
+					t.Fatalf("expected cars %+v, got %+v", expectedCars, gotCars)
+				}
 			}
 		})
 	}
@@ -251,52 +248,46 @@ func Test_Car_Create(t *testing.T) {
 		expectedResponse any
 	}{
 		{
-			name:           "invalid request body: missing comma",
-			body:           `{"make": "Chevrolet" "model": "Onix"}`,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid request body",
-			},
+			name:             "invalid request body: missing comma",
+			body:             `{"make": "Chevrolet" "model": "Onix"}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
 		},
 		{
-			name:           "year is missing",
-			body:           `{"make":"Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan"}`,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid request body",
-			},
+			name:             "year is missing",
+			body:             `{"make":"Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan"}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
 		},
 		{
-			name:           "category is missing",
-			body:           `{"make":"Chevrolet", "model":"Onix", "color":"Gray", "year":2025}`,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid request body",
-			},
+			name:             "category is missing",
+			body:             `{"make":"Chevrolet", "model":"Onix", "color":"Gray", "year":2025}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
 		},
 		{
-			name:           "color is missing",
-			body:           `{"make":"Chevrolet", "model":"Onix", "category":"Sedan", "year":2025}`,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid request body",
-			},
+			name:             "color is missing",
+			body:             `{"make":"Chevrolet", "model":"Onix", "category":"Sedan", "year":2025}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
 		},
 		{
-			name:           "model is missing",
-			body:           `{"make":"Chevrolet", "color":"Gray", "category":"Sedan", "year":2025}`,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid request body",
-			},
+			name:             "model is missing",
+			body:             `{"make":"Chevrolet", "color":"Gray", "category":"Sedan", "year":2025}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
 		},
 		{
-			name:           "make is missing",
-			body:           `{"model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid request body",
-			},
+			name:             "make is missing",
+			body:             `{"model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
+		},
+		{
+			name:             "id not allowed on create",
+			body:             `{"id": "ABC123", "make": "Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "ID must not be provided when creating a new record"},
 		},
 		{
 			name: "repository error",
@@ -304,10 +295,8 @@ func Test_Car_Create(t *testing.T) {
 			createFn: func(car *models.Car) error {
 				return errors.New("repository error")
 			},
-			expectedStatus: http.StatusInternalServerError,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Internal server error",
-			},
+			expectedStatus:   http.StatusInternalServerError,
+			expectedResponse: httpx.ErrorResponse{Message: "Internal server error"},
 		},
 		{
 			name: "car created successfully",
@@ -318,7 +307,14 @@ func Test_Car_Create(t *testing.T) {
 			},
 			expectedStatus: http.StatusCreated,
 			expectedResponse: httpx.SuccessResponse{
-				Data: models.Car{ID: "A1", Make: "Chevrolet", Model: "Onix", Color: "Gray", Category: "Sedan", Year: 2025},
+				Data: models.Car{
+					ID:       "A1",
+					Make:     "Chevrolet",
+					Model:    "Onix",
+					Color:    "Gray",
+					Category: "Sedan",
+					Year:     2025,
+				},
 			},
 		},
 	}
@@ -341,38 +337,38 @@ func Test_Car_Create(t *testing.T) {
 				t.Fatalf("expected status %v, got %v", tc.expectedStatus, resp.Code)
 			}
 
-			// Check error response
-			if expected, ok := tc.expectedResponse.(httpx.ErrorResponse); ok {
+			body := resp.Body.Bytes()
+
+			switch expected := tc.expectedResponse.(type) {
+			case httpx.ErrorResponse:
 				var got httpx.ErrorResponse
-				if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
+				if err := json.Unmarshal(body, &got); err != nil {
 					t.Fatal(err)
 				}
 
 				if got.Message != expected.Message {
 					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
 				}
-				return
-			}
+			case httpx.SuccessResponse:
+				var got httpx.SuccessResponse
+				if err := json.Unmarshal(body, &got); err != nil {
+					t.Fatal(err)
+				}
 
-			// Check success response
-			var got httpx.SuccessResponse
-			if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
-				t.Fatal(err)
-			}
+				gotDataBytes, err := json.Marshal(got.Data)
+				if err != nil {
+					t.Fatal(err)
+				}
 
-			gotDataBytes, err := json.Marshal(got.Data)
-			if err != nil {
-				t.Fatal(err)
-			}
+				var gotCar models.Car
+				if err := json.Unmarshal(gotDataBytes, &gotCar); err != nil {
+					t.Fatal(err)
+				}
 
-			var gotCar models.Car
-			if err := json.Unmarshal(gotDataBytes, &gotCar); err != nil {
-				t.Fatal(err)
-			}
-
-			expectedCar := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Car)
-			if !reflect.DeepEqual(gotCar, expectedCar) {
-				t.Fatalf("expected car %+v, got %+v", expectedCar, gotCar)
+				expectedCar := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Car)
+				if !reflect.DeepEqual(gotCar, expectedCar) {
+					t.Fatalf("expected car %+v, got %+v", expectedCar, gotCar)
+				}
 			}
 		})
 	}
@@ -388,74 +384,58 @@ func Test_Car_Update(t *testing.T) {
 		expectedResponse any
 	}{
 		{
-			name:           "missing param",
-			idParam:        "",
-			body:           ``,
-			updateFn:       nil,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid path format: expected /cars/{id}",
-			},
+			name:             "missing param",
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid path format: expected /cars/{id}"},
 		},
 		{
-			name:           "invalid request body: missing comma",
-			idParam:        "ABC123",
-			body:           `{"make": "Chevrolet" "model": "Onix"}`,
-			updateFn:       nil,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid request body",
-			},
+			name:             "invalid request body: missing comma",
+			idParam:          "ABC123",
+			body:             `{"make": "Chevrolet" "model": "Onix"}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
 		},
 		{
-			name:           "year is missing",
-			idParam:        "ABC123",
-			body:           `{"make":"Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan"}`,
-			updateFn:       nil,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid request body",
-			},
+			name:             "year is missing",
+			idParam:          "ABC123",
+			body:             `{"make":"Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan"}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
 		},
 		{
-			name:           "category is missing",
-			idParam:        "ABC123",
-			body:           `{"make":"Chevrolet", "model":"Onix", "color":"Gray", "year":2025}`,
-			updateFn:       nil,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid request body",
-			},
+			name:             "category is missing",
+			idParam:          "ABC123",
+			body:             `{"make":"Chevrolet", "model":"Onix", "color":"Gray", "year":2025}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
 		},
 		{
-			name:           "color is missing",
-			idParam:        "ABC123",
-			body:           `{"make":"Chevrolet", "model":"Onix", "category":"Sedan", "year":2025}`,
-			updateFn:       nil,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid request body",
-			},
+			name:             "color is missing",
+			idParam:          "ABC123",
+			body:             `{"make":"Chevrolet", "model":"Onix", "category":"Sedan", "year":2025}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
 		},
 		{
-			name:           "model is missing",
-			idParam:        "ABC123",
-			body:           `{"make":"Chevrolet", "color":"Gray", "category":"Sedan", "year":2025}`,
-			updateFn:       nil,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid request body",
-			},
+			name:             "model is missing",
+			idParam:          "ABC123",
+			body:             `{"make":"Chevrolet", "color":"Gray", "category":"Sedan", "year":2025}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
 		},
 		{
-			name:           "make is missing",
-			idParam:        "ABC123",
-			body:           `{"model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
-			updateFn:       nil,
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Invalid request body",
-			},
+			name:             "make is missing",
+			idParam:          "ABC123",
+			body:             `{"model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
+		},
+		{
+			name:             "body id mismatch",
+			idParam:          "ABC123",
+			body:             `{"id": "DEF456", "make":"Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "ID in body does not match URL ID"},
 		},
 		{
 			name:    "car not found",
@@ -464,10 +444,8 @@ func Test_Car_Update(t *testing.T) {
 			updateFn: func(car *models.Car) error {
 				return e.ErrCarNotFound
 			},
-			expectedStatus: http.StatusNotFound,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Car not found",
-			},
+			expectedStatus:   http.StatusNotFound,
+			expectedResponse: httpx.ErrorResponse{Message: "Car not found"},
 		},
 		{
 			name:    "repository error",
@@ -476,10 +454,8 @@ func Test_Car_Update(t *testing.T) {
 			updateFn: func(car *models.Car) error {
 				return errors.New("repository error")
 			},
-			expectedStatus: http.StatusInternalServerError,
-			expectedResponse: httpx.ErrorResponse{
-				Message: "Internal server error",
-			},
+			expectedStatus:   http.StatusInternalServerError,
+			expectedResponse: httpx.ErrorResponse{Message: "Internal server error"},
 		},
 		{
 			name:    "car updated successfully",
@@ -490,7 +466,13 @@ func Test_Car_Update(t *testing.T) {
 			},
 			expectedStatus: http.StatusOK,
 			expectedResponse: httpx.SuccessResponse{
-				Data: models.Car{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Color: "Gray", Category: "Sedan", Year: 2025},
+				Data: models.Car{
+					ID:       "ABC123",
+					Make:     "Chevrolet",
+					Model:    "Onix",
+					Color:    "Gray",
+					Category: "Sedan",
+					Year:     2025},
 			},
 		},
 	}
@@ -499,9 +481,7 @@ func Test_Car_Update(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			controller := NewCarController(
 				services.NewCarService(
-					&MockCarRepository{
-						UpdateFn: tc.updateFn,
-					},
+					&MockCarRepository{UpdateFn: tc.updateFn},
 				),
 			)
 
@@ -515,38 +495,38 @@ func Test_Car_Update(t *testing.T) {
 				t.Fatalf("expected status %v, got %v", tc.expectedStatus, resp.Code)
 			}
 
-			// Check error response
-			if expected, ok := tc.expectedResponse.(httpx.ErrorResponse); ok {
+			body := resp.Body.Bytes()
+
+			switch expected := tc.expectedResponse.(type) {
+			case httpx.ErrorResponse:
 				var got httpx.ErrorResponse
-				if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
+				if err := json.Unmarshal(body, &got); err != nil {
 					t.Fatal(err)
 				}
 
 				if got.Message != expected.Message {
 					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
 				}
-				return
-			}
+			case httpx.SuccessResponse:
+				var got httpx.SuccessResponse
+				if err := json.Unmarshal(body, &got); err != nil {
+					t.Fatal(err)
+				}
 
-			// Check success response
-			var got httpx.SuccessResponse
-			if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
-				t.Fatal(err)
-			}
+				gotDataBytes, err := json.Marshal(got.Data)
+				if err != nil {
+					t.Fatal(err)
+				}
 
-			gotDataBytes, err := json.Marshal(got.Data)
-			if err != nil {
-				t.Fatal(err)
-			}
+				var gotCar models.Car
+				if err := json.Unmarshal(gotDataBytes, &gotCar); err != nil {
+					t.Fatal(err)
+				}
 
-			var gotCar models.Car
-			if err := json.Unmarshal(gotDataBytes, &gotCar); err != nil {
-				t.Fatal(err)
-			}
-
-			expectedCar := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Car)
-			if !reflect.DeepEqual(gotCar, expectedCar) {
-				t.Fatalf("expected car %+v, got %+v", expectedCar, gotCar)
+				expectedCar := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Car)
+				if !reflect.DeepEqual(gotCar, expectedCar) {
+					t.Fatalf("expected car %+v, got %+v", expectedCar, gotCar)
+				}
 			}
 		})
 	}
