@@ -110,38 +110,38 @@ func Test_Car_Get(t *testing.T) {
 				t.Fatalf("expected status %v, got %v", tc.expectedStatus, resp.Code)
 			}
 
-			// Check error response
-			if expected, ok := tc.expectedResponse.(httpx.ErrorResponse); ok {
+			body := resp.Body.Bytes()
+
+			switch expected := tc.expectedResponse.(type) {
+			case httpx.ErrorResponse:
 				var got httpx.ErrorResponse
-				if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
+				if err := json.Unmarshal(body, &got); err != nil {
 					t.Fatal(err)
 				}
 
 				if got.Message != expected.Message {
 					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
 				}
-				return
-			}
+			case httpx.SuccessResponse:
+				var got httpx.SuccessResponse
+				if err := json.Unmarshal(body, &got); err != nil {
+					t.Fatal(err)
+				}
 
-			// Check success response
-			var got httpx.SuccessResponse
-			if err := json.NewDecoder(resp.Body).Decode(&got); err != nil {
-				t.Fatal(err)
-			}
+				gotDataBytes, err := json.Marshal(got.Data)
+				if err != nil {
+					t.Fatal(err)
+				}
 
-			gotDataBytes, err := json.Marshal(got.Data)
-			if err != nil {
-				t.Fatal(err)
-			}
+				gotCar := models.Car{}
+				if err := json.Unmarshal(gotDataBytes, &gotCar); err != nil {
+					t.Fatal(err)
+				}
 
-			gotCar := models.Car{}
-			if err := json.Unmarshal(gotDataBytes, &gotCar); err != nil {
-				t.Fatal(err)
-			}
-
-			expectedCar := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Car)
-			if !reflect.DeepEqual(gotCar, expectedCar) {
-				t.Fatalf("expected car %+v, got %+v", expectedCar, gotCar)
+				expectedCar := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Car)
+				if !reflect.DeepEqual(gotCar, expectedCar) {
+					t.Fatalf("expected car %+v, got %+v", expectedCar, gotCar)
+				}
 			}
 		})
 	}
