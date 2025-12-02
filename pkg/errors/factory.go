@@ -5,8 +5,8 @@ import "net/http"
 func wrap(code string, status int, message string, err error) *ServiceError {
 	return &ServiceError{
 		Code:       code,
-		Message:    message,
 		StatusCode: status,
+		Message:    message,
 		Err:        err,
 	}
 }

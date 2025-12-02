@@ -10,6 +10,7 @@ import (
 type ErrorResponse struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
+	Details string `json:"details,omitempty"`
 }
 
 type SuccessResponse struct {
@@ -25,13 +26,14 @@ func JSON(w http.ResponseWriter, status int, payload any) error {
 	})
 }
 
-func writeError(w http.ResponseWriter, status int, code, message string) {
+func writeError(w http.ResponseWriter, err *e.ServiceError) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
+	w.WriteHeader(err.StatusCode)
 
 	_ = json.NewEncoder(w).Encode(ErrorResponse{
-		Code:    code,
-		Message: message,
+		Code:    err.Code,
+		Message: err.Message,
+		Details: err.Details(),
 	})
 }
 
@@ -39,9 +41,15 @@ func HandleServiceError(w http.ResponseWriter, err error) {
 	var serviceError *e.ServiceError
 
 	if errors.As(err, &serviceError) {
-		writeError(w, serviceError.StatusCode, serviceError.Code, serviceError.Message)
+		writeError(w, serviceError)
 		return
 	}
 
-	writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "Internal server error")
+	// Unexpected errors
+	writeError(w, &e.ServiceError{
+		StatusCode: http.StatusInternalServerError,
+		Code:       "INTERNAL_ERROR",
+		Message:    "Internal server error",
+		Err:        err,
+	})
 }
