@@ -7,6 +7,7 @@ import (
 	"cars/services"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -149,18 +150,11 @@ func Test_Car_Get(t *testing.T) {
 func Test_Car_List(t *testing.T) {
 	tCases := []struct {
 		name             string
+		queryParams      string
 		listFn           func(f models.CarFilters) (models.Cars, error)
 		expectedStatus   int
 		expectedResponse any
 	}{
-		{
-			name: "repository error",
-			listFn: func(f models.CarFilters) (models.Cars, error) {
-				return nil, errors.New("repository error")
-			},
-			expectedStatus:   http.StatusInternalServerError,
-			expectedResponse: httpx.ErrorResponse{Message: "Internal server error"},
-		},
 		{
 			name: "list with 3 cars",
 			listFn: func(f models.CarFilters) (models.Cars, error) {
@@ -179,6 +173,20 @@ func Test_Car_List(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:             "invalid params",
+			queryParams:      "?year=MMXXV",
+			expectedStatus:   http.StatusInternalServerError,
+			expectedResponse: httpx.ErrorResponse{Message: "Internal server error"},
+		},
+		{
+			name: "repository error",
+			listFn: func(f models.CarFilters) (models.Cars, error) {
+				return nil, errors.New("repository error")
+			},
+			expectedStatus:   http.StatusInternalServerError,
+			expectedResponse: httpx.ErrorResponse{Message: "Internal server error"},
+		},
 	}
 
 	for _, tc := range tCases {
@@ -190,7 +198,7 @@ func Test_Car_List(t *testing.T) {
 			)
 
 			resp := httptest.NewRecorder()
-			req := httptest.NewRequest("GET", "/cars", nil)
+			req := httptest.NewRequest("GET", fmt.Sprintf("%s%s", "/cars", tc.queryParams), nil)
 			controller.List(resp, req)
 
 			// Check status code
