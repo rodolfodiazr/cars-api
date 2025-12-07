@@ -8,29 +8,29 @@ import (
 func TestDefaultCarRepository_List(t *testing.T) {
 	// Initial seed data
 	cars := map[string]models.Car{
-		"JHK290XJ": {
-			ID:   "JHK290XJ",
+		"1": {
+			ID:   "1",
 			Make: "Ford", Model: "F10", Package: "Base",
 			Color: "Silver", Year: 2010, Category: "Truck",
 			Mileage: 120123, Price: 1999900,
 		},
-		"FWL37LA": {
-			ID:   "FWL37LA",
+		"2": {
+			ID:   "2",
 			Make: "Toyota", Model: "Camry", Package: "SE",
 			Color: "White", Year: 2019, Category: "Sedan",
 			Mileage: 3999, Price: 2899000,
 		},
-		"1I3XJRLLC": {
-			ID:   "1I3XJRLLC",
+		"3": {
+			ID:   "3",
 			Make: "Toyota", Model: "Rav4", Package: "XSE",
 			Color: "Red", Year: 2018, Category: "SUV",
 			Mileage: 24001, Price: 2275000,
 		},
-		"DKU43920S": {
-			ID:   "DKU43920S",
+		"4": {
+			ID:   "4",
 			Make: "Ford", Model: "Bronco", Package: "Badlands",
 			Color: "Burnt Orange", Year: 2022, Category: "SUV",
-			Mileage: 1, Price: 4499000,
+			Mileage: 0, Price: 4499000,
 		},
 	}
 
@@ -39,53 +39,47 @@ func TestDefaultCarRepository_List(t *testing.T) {
 	tests := []struct {
 		name     string
 		filters  models.CarFilters
-		expected []string // list of expected IDs
+		expected []string
 	}{
 		{
-			name:     "no filters returns all",
+			name:     "No filters, returns all",
 			filters:  models.CarFilters{},
-			expected: []string{"1", "2", "3"},
+			expected: []string{"1", "2", "3", "4"},
 		},
 		{
-			name:    "filter by make",
-			filters: models.CarFilters{Make: "Toyota"},
-			expected: []string{
-				"1", "3",
-			},
+			name:     "Filter by make",
+			filters:  models.CarFilters{Make: "Toyota"},
+			expected: []string{"2", "3"},
 		},
 		{
-			name:    "filter by model",
-			filters: models.CarFilters{Model: "Civic"},
-			expected: []string{
-				"2",
-			},
+			name:     "Filter by model",
+			filters:  models.CarFilters{Model: "Bronco"},
+			expected: []string{"4"},
 		},
 		{
-			name:    "filter by year",
-			filters: models.CarFilters{Year: 2021},
-			expected: []string{
-				"2", "3",
-			},
+			name:     "Filter by year",
+			filters:  models.CarFilters{Year: 2010},
+			expected: []string{"1"},
 		},
 		{
-			name: "filter by make and year",
+			name: "Filter by make and year",
 			filters: models.CarFilters{
 				Make: "Toyota",
-				Year: 2021,
+				Year: 2018,
 			},
 			expected: []string{"3"},
 		},
 		{
-			name: "case-insensitive filtering",
+			name: "Case-insensitive filtering",
 			filters: models.CarFilters{
 				Make:  "tOyOtA",
 				Model: "cAmRy",
 			},
-			expected: []string{"3"},
+			expected: []string{"2"},
 		},
 		{
-			name:     "no match returns empty list",
-			filters:  models.CarFilters{Make: "Ford"},
+			name:     "No match, returns empty list",
+			filters:  models.CarFilters{Make: "BMW"},
 			expected: []string{},
 		},
 	}
@@ -111,7 +105,7 @@ func TestDefaultCarRepository_List(t *testing.T) {
 					}
 				}
 				if !found {
-					t.Errorf("expected car ID %s not found in result", id)
+					t.Errorf("Expected car ID %s not found in result", id)
 				}
 			}
 		})
