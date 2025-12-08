@@ -62,12 +62,37 @@ func TestDefaultCarRepository_List(t *testing.T) {
 			expected: []string{"1"},
 		},
 		{
+			name: "Filter by make and model",
+			filters: models.CarFilters{
+				Make:  "Ford",
+				Model: "F10",
+			},
+			expected: []string{"1"},
+		},
+		{
 			name: "Filter by make and year",
 			filters: models.CarFilters{
 				Make: "Toyota",
-				Year: 2018,
+				Year: 2019,
+			},
+			expected: []string{"2"},
+		},
+		{
+			name: "Filter by model and year",
+			filters: models.CarFilters{
+				Model: "Rav4",
+				Year:  2018,
 			},
 			expected: []string{"3"},
+		},
+		{
+			name: "Filter by make, model and year",
+			filters: models.CarFilters{
+				Make:  "Ford",
+				Model: "Bronco",
+				Year:  2022,
+			},
+			expected: []string{"4"},
 		},
 		{
 			name: "Case-insensitive filtering",
