@@ -6,7 +6,7 @@ A RESTful API for managing a collection of cars. Built to support creation, retr
 
 This API enables clients to:
 
-- 📄 **List** all cars
-- ➕ **Create** a new car
-- 🔍 **Retrieve** a car by ID
-- ✏️ **Update** a car by ID
+- 📄 **List** all cars.
+- ➕ **Create** a new car.
+- 🔍 **Retrieve** a car by ID.
+- ✏️ **Update** a car by ID.
