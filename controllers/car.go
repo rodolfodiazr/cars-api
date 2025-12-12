@@ -28,25 +28,25 @@ func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 
 	id, err := c.getIDFromURL(r)
 	if err != nil {
-		log.Printf("[ERROR] %v", err)
+		log.Print(err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	car, err := c.service.Find(id)
 	if err != nil {
-		log.Printf("[ERROR] Failed to retrieve car: %v", err)
+		log.Printf("error retrieving car id=%s: %v", id, err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	if err := httpx.JSON(w, http.StatusOK, car); err != nil {
-		log.Printf("[ERROR] Failed to encode car response: %v", err)
+		log.Printf("error encoding car response: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
-	log.Printf("[INFO] Car with ID %s retrieved successfully", id)
+	log.Printf("car retrieved id=%s", id)
 }
 
 // List handles retrieving all available cars.
@@ -55,25 +55,25 @@ func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 
 	filters, err := c.parseCarFilters(r)
 	if err != nil {
-		log.Printf("[ERROR] Invalid params: %v", err)
+		log.Printf("error parsing car filters: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	cars, err := c.service.List(filters)
 	if err != nil {
-		log.Printf("[ERROR] Failed to retrieve car list: %v", err)
+		log.Printf("error retrieving cars: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	if err := httpx.JSON(w, http.StatusOK, cars); err != nil {
-		log.Printf("[ERROR] Failed to encode car list response: %v", err)
+		log.Printf("error encoding cars response: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
-	log.Printf("[INFO] Successfully retrieved %d cars", len(cars))
+	log.Printf("%d cars retrieved", len(cars))
 }
 
 // Create handles creating a new car.
@@ -82,24 +82,24 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 
 	car, err := httpx.DecodeAndValidate[models.Car](r)
 	if err != nil {
-		log.Printf("[ERROR] Invalid car payload: %v", err)
+		log.Printf("error decoding car payload: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	if err := c.service.Create(car); err != nil {
-		log.Printf("[ERROR] Failed to create car: %v", err)
+		log.Printf("error creating car: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	if err := httpx.JSON(w, http.StatusCreated, car); err != nil {
-		log.Printf("[ERROR] Failed to encode created car response: %v", err)
+		log.Printf("error encoding created car response: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
-	log.Printf("[INFO] Car with ID %s has been created successfully", car.ID)
+	log.Printf("car created id=%s", car.ID)
 }
 
 // Update handles updating an existing car.
@@ -108,14 +108,14 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 
 	id, err := c.getIDFromURL(r)
 	if err != nil {
-		log.Printf("[ERROR] %v", err)
+		log.Print(err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	car, err := httpx.DecodeAndValidate[models.Car](r)
 	if err != nil {
-		log.Printf("[ERROR] Invalid car payload: %v", err)
+		log.Printf("error decoding car payload: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
@@ -124,18 +124,18 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	car.ID = id         // Override with URL ID
 
 	if err := c.service.Update(car); err != nil {
-		log.Printf("[ERROR] Failed to update car: %v", err)
+		log.Printf("error updating car id=%s: %v", car.ID, err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
 	if err := httpx.JSON(w, http.StatusOK, car); err != nil {
-		log.Printf("[ERROR] Failed to encode updated car response: %v", err)
+		log.Printf("error encoding updated car response: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
-	log.Printf("[INFO] Car with ID %s has been updated successfully", id)
+	log.Printf("car updated id=%s", id)
 }
 
 // getIDFromURL extracts the car ID from the request URL.
