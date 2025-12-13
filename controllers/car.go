@@ -28,7 +28,7 @@ func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 
 	id, err := c.getIDFromURL(r)
 	if err != nil {
-		log.Print(err)
+		log.Printf("error getting id from url: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
@@ -108,7 +108,7 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 
 	id, err := c.getIDFromURL(r)
 	if err != nil {
-		log.Print(err)
+		log.Printf("error getting id from url: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
