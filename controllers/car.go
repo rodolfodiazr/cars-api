@@ -2,14 +2,14 @@ package controllers
 
 import (
 	"cars/models"
-	e "cars/pkg/errors"
 	"cars/pkg/httpx"
 	"cars/pkg/logger"
 	"cars/services"
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
+
+	"github.com/go-chi/chi/v5"
 )
 
 // CarController manages HTTP requests related to cars.
@@ -26,12 +26,7 @@ func NewCarController(service services.CarService) *CarController {
 func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	id, err := c.getIDFromURL(r)
-	if err != nil {
-		log.Printf("error getting id from url: %v", err)
-		httpx.HandleServiceError(w, err)
-		return
-	}
+	id := chi.URLParam(r, "id")
 
 	car, err := c.service.Find(id)
 	if err != nil {
@@ -106,12 +101,7 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	id, err := c.getIDFromURL(r)
-	if err != nil {
-		log.Printf("error getting id from url: %v", err)
-		httpx.HandleServiceError(w, err)
-		return
-	}
+	id := chi.URLParam(r, "id")
 
 	car, err := httpx.DecodeAndValidate[models.Car](r)
 	if err != nil {
@@ -136,18 +126,6 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("car updated id=%s", id)
-}
-
-// getIDFromURL extracts the car ID from the request URL.
-func (c *CarController) getIDFromURL(r *http.Request) (string, error) {
-	path := strings.Trim(r.URL.Path, "/")
-	parts := strings.Split(path, "/")
-
-	if len(parts) != 2 || parts[0] != "cars" {
-		return "", e.NewInvalidCarPathError()
-	}
-
-	return parts[1], nil
 }
 
 // parseCarFilters converts URL query parameters into a CarFilters struct.

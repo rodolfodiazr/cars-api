@@ -3,56 +3,34 @@ package routes
 import (
 	"cars/controllers"
 	"cars/data"
-	e "cars/pkg/errors"
-	"cars/pkg/httpx"
 	"cars/pkg/middleware"
 	"cars/repositories"
 	"cars/services"
-	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	chimw "github.com/go-chi/chi/v5/middleware"
 )
 
-var mux = http.NewServeMux()
-
-func Register() *http.ServeMux {
+func Register() *chi.Mux {
 	repo := repositories.NewCarRepository(data.Cars())
 	service := services.NewCarService(repo)
 	cars := controllers.NewCarController(service)
 
-	mux.Handle("/cars",
-		middleware.Logging(
-			handleCars(cars),
-		),
-	)
-	mux.Handle("/cars/",
-		middleware.Logging(
-			handleCarByID(cars),
-		),
-	)
-	return mux
-}
+	r := chi.NewRouter()
 
-func handleCars(cars *controllers.CarController) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			cars.List(w, r)
-		case http.MethodPost:
-			cars.Create(w, r)
-		default:
-			httpx.HandleServiceError(w, e.NewMethodNotAllowedError())
-		}
-	}
-}
+	r.Use(chimw.CleanPath)
+	r.Use(chimw.Recoverer)
 
-func handleCarByID(cars *controllers.CarController) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			cars.Get(w, r)
-		case http.MethodPut:
-			cars.Update(w, r)
-		default:
-			httpx.HandleServiceError(w, e.NewMethodNotAllowedError())
-		}
-	}
+	r.Use(middleware.Logging)
+
+	r.Route("/cars", func(r chi.Router) {
+		r.Get("/", cars.List)
+		r.Post("/", cars.Create)
+
+		r.Route("/{id:[A-Za-z0-9-]+}", func(r chi.Router) {
+			r.Get("/", cars.Get)
+			r.Put("/", cars.Update)
+		})
+	})
+	return r
 }

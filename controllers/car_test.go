@@ -13,6 +13,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type MockCarRepository struct {
@@ -43,11 +45,6 @@ func Test_Car_Get(t *testing.T) {
 		expectedStatus   int
 		expectedResponse any
 	}{
-		{
-			name:             "missing param",
-			expectedStatus:   http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{Message: "Invalid path format: expected /cars/{id}"},
-		},
 		{
 			name:    "car not found",
 			idParam: "DEF456",
@@ -101,9 +98,15 @@ func Test_Car_Get(t *testing.T) {
 				),
 			)
 
+			router := chi.NewRouter()
+			router.Route("/cars", func(r chi.Router) {
+				r.Get("/{id:[A-Za-z0-9-]+}", controller.Get)
+			})
+
 			resp := httptest.NewRecorder()
 			req := httptest.NewRequest("GET", "/cars/"+tc.idParam, nil)
-			controller.Get(resp, req)
+
+			router.ServeHTTP(resp, req)
 
 			// Check status code
 			if resp.Code != tc.expectedStatus {
@@ -197,9 +200,15 @@ func Test_Car_List(t *testing.T) {
 				),
 			)
 
+			router := chi.NewRouter()
+			router.Route("/cars", func(r chi.Router) {
+				r.Get("/", controller.List)
+			})
+
 			resp := httptest.NewRecorder()
 			req := httptest.NewRequest("GET", fmt.Sprintf("%s%s", "/cars", tc.queryParams), nil)
-			controller.List(resp, req)
+
+			router.ServeHTTP(resp, req)
 
 			// Check status code
 			if resp.Code != tc.expectedStatus {
@@ -335,10 +344,16 @@ func Test_Car_Create(t *testing.T) {
 				),
 			)
 
+			router := chi.NewRouter()
+			router.Route("/cars", func(r chi.Router) {
+				r.Post("/", controller.Create)
+			})
+
 			resp := httptest.NewRecorder()
 			req := httptest.NewRequest("POST", "/cars", strings.NewReader(tc.body))
 			req.Header.Set("Content-Type", "application/json")
-			controller.Create(resp, req)
+
+			router.ServeHTTP(resp, req)
 
 			// Check status code
 			if resp.Code != tc.expectedStatus {
@@ -391,11 +406,6 @@ func Test_Car_Update(t *testing.T) {
 		expectedStatus   int
 		expectedResponse any
 	}{
-		{
-			name:             "missing param",
-			expectedStatus:   http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{Message: "Invalid path format: expected /cars/{id}"},
-		},
 		{
 			name:             "invalid request body: missing comma",
 			idParam:          "ABC123",
@@ -493,10 +503,16 @@ func Test_Car_Update(t *testing.T) {
 				),
 			)
 
+			router := chi.NewRouter()
+			router.Route("/cars", func(r chi.Router) {
+				r.Put("/{id:[A-Za-z0-9-]+}", controller.Update)
+			})
+
 			resp := httptest.NewRecorder()
 			req := httptest.NewRequest("PUT", "/cars/"+tc.idParam, strings.NewReader(tc.body))
 			req.Header.Set("Content-Type", "application/json")
-			controller.Update(resp, req)
+
+			router.ServeHTTP(resp, req)
 
 			// Check status code
 			if resp.Code != tc.expectedStatus {
