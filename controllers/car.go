@@ -7,6 +7,7 @@ import (
 	"cars/services"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
@@ -48,7 +49,7 @@ func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	filters, err := c.parseCarFilters(r)
+	filters, err := parseCarFilters(r.URL.Query())
 	if err != nil {
 		log.Printf("error parsing car filters: %v", err)
 		httpx.HandleServiceError(w, err)
@@ -129,18 +130,19 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 // parseCarFilters converts URL query parameters into a CarFilters struct.
-func (c *CarController) parseCarFilters(r *http.Request) (models.CarFilters, error) {
-	var filters models.CarFilters
+func parseCarFilters(q url.Values) (models.CarFilters, error) {
+	f := models.CarFilters{
+		Make:  q.Get("make"),
+		Model: q.Get("model"),
+	}
 
-	filters.Make = r.URL.Query().Get("make")
-	filters.Model = r.URL.Query().Get("model")
-
-	if yearStr := r.URL.Query().Get("year"); yearStr != "" {
+	if yearStr := q.Get("year"); yearStr != "" {
 		year, err := strconv.Atoi(yearStr)
 		if err != nil {
-			return filters, fmt.Errorf("invalid year: %q", yearStr)
+			return f, fmt.Errorf("invalid year: %q", yearStr)
 		}
-		filters.Year = year
+		f.Year = year
 	}
-	return filters, nil
+
+	return f, nil
 }
