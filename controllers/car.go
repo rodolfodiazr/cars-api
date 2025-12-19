@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"cars/api/dto"
 	"cars/models"
 	"cars/pkg/httpx"
 	"cars/pkg/logger"
@@ -76,12 +77,14 @@ func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	car, err := httpx.DecodeAndValidate[models.Car](r)
+	req, err := httpx.DecodeAndValidate[dto.CreateCarRequest](r)
 	if err != nil {
 		log.Printf("error decoding car payload: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
+
+	car := dto.ToModelCreate(*req)
 
 	if err := c.service.Create(car); err != nil {
 		log.Printf("error creating car: %v", err)
@@ -89,7 +92,9 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := httpx.JSON(w, http.StatusCreated, car); err != nil {
+	resp := dto.ToResponse(*car)
+
+	if err := httpx.JSON(w, http.StatusCreated, resp); err != nil {
 		log.Printf("error encoding created car response: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
