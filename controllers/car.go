@@ -109,15 +109,14 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 
 	id := chi.URLParam(r, "id")
 
-	car, err := httpx.DecodeAndValidate[models.Car](r)
+	req, err := httpx.DecodeAndValidate[dto.UpdateCarRequest](r)
 	if err != nil {
 		log.Printf("error decoding car payload: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
 
-	car.BodyID = car.ID // Preserve original
-	car.ID = id         // Override with URL ID
+	car := dto.ToModelUpdate(id, *req)
 
 	if err := c.service.Update(car); err != nil {
 		log.Printf("error updating car id=%s: %v", car.ID, err)
@@ -125,7 +124,9 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := httpx.JSON(w, http.StatusOK, car); err != nil {
+	resp := dto.ToResponse(*car)
+
+	if err := httpx.JSON(w, http.StatusOK, resp); err != nil {
 		log.Printf("error encoding updated car response: %v", err)
 		httpx.HandleServiceError(w, err)
 		return

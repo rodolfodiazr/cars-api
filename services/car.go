@@ -48,19 +48,11 @@ func (s *DefaultCarService) List(f models.CarFilters) (models.Cars, error) {
 
 // Create adds a new car to the repository.
 func (s *DefaultCarService) Create(car *models.Car) error {
-	if car.ID != "" {
-		return e.NewIDNotAllowedOnCreateError()
-	}
-
 	return s.repo.Create(car)
 }
 
 // Update updates a car in the repository.
 func (s *DefaultCarService) Update(car *models.Car) error {
-	if car.BodyID != "" && car.BodyID != car.ID {
-		return e.NewBodyIDMismatchError()
-	}
-
 	if err := s.repo.Update(car); err != nil {
 		if errors.Is(err, e.ErrCarNotFound) {
 			return e.NewCarNotFoundError(err)

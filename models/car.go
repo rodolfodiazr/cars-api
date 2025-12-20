@@ -8,18 +8,17 @@ import (
 
 // Car represents a vehicle with various attributes such as make, model, package, color, category, year, mileage, and price.
 type Car struct {
-	ID     string `json:"id"` // Unique identifier for the car.
-	BodyID string `json:"-"`
+	ID string // Unique identifier for the car.
 
-	Make     string `json:"make"`              // Manufacturer of the car (e.g., Toyota, Ford).
-	Model    string `json:"model"`             // Model name of the car (e.g., Camry, F-10).
-	Package  string `json:"package,omitempty"` // Package level (e.g., SE, XSE).
-	Color    string `json:"color"`             // Exterior color of the car.
-	Category string `json:"category"`          // Vehicle category (e.g., SUV, Sedan, Truck).
-	Year     int    `json:"year"`              // Manufacturing year of the car.
+	Make     string // Manufacturer of the car (e.g., Toyota, Ford).
+	Model    string // Model name of the car (e.g., Camry, F-10).
+	Package  string // Package level (e.g., SE, XSE).
+	Color    string // Exterior color of the car.
+	Category string // Vehicle category (e.g., SUV, Sedan, Truck).
+	Year     int    // Manufacturing year of the car.
 
-	Mileage float64 `json:"mileage,omitempty"` // Distance the car has traveled, measured in miles.
-	Price   float64 `json:"price,omitempty"`   // Price of the car in cents.
+	Mileage float64 // Distance the car has traveled, measured in miles.
+	Price   float64 // Price of the car in cents.
 }
 
 // Cars represents a collection of Car objects.

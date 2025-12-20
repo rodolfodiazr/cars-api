@@ -4,28 +4,42 @@ import "cars/models"
 
 func ToModelCreate(req CreateCarRequest) *models.Car {
 	return &models.Car{
-		Make:  req.Make,
-		Model: req.Model,
-		Year:  req.Year,
+		Make:     req.Make,
+		Model:    req.Model,
+		Package:  req.Package,
+		Color:    req.Color,
+		Category: req.Category,
+		Year:     req.Year,
+		Mileage:  req.Mileage,
+		Price:    req.Price,
 	}
 }
 
 func ToModelUpdate(id string, req UpdateCarRequest) *models.Car {
 	return &models.Car{
-		ID:     id,
-		BodyID: req.ID,
-		Make:   req.Make,
-		Model:  req.Model,
-		Year:   req.Year,
+		ID:       id,
+		Make:     req.Make,
+		Model:    req.Model,
+		Package:  req.Package,
+		Color:    req.Color,
+		Category: req.Category,
+		Year:     req.Year,
+		Mileage:  req.Mileage,
+		Price:    req.Price,
 	}
 }
 
 func ToResponse(car models.Car) CarResponse {
 	return CarResponse{
-		ID:    car.ID,
-		Make:  car.Make,
-		Model: car.Model,
-		Year:  car.Year,
+		ID:       car.ID,
+		Make:     car.Make,
+		Model:    car.Model,
+		Package:  car.Package,
+		Color:    car.Color,
+		Category: car.Category,
+		Year:     car.Year,
+		Mileage:  car.Mileage,
+		Price:    car.Price,
 	}
 }
 

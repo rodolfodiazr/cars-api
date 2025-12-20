@@ -301,12 +301,6 @@ func Test_Car_Create(t *testing.T) {
 			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
 		},
 		{
-			name:             "id not allowed on create",
-			body:             `{"id": "ABC123", "make": "Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
-			expectedStatus:   http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{Message: "ID must not be provided when creating a new record"},
-		},
-		{
 			name: "repository error",
 			body: `{"make": "Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
 			createFn: func(car *models.Car) error {
@@ -319,7 +313,9 @@ func Test_Car_Create(t *testing.T) {
 			name: "car created successfully",
 			body: `{"make": "Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
 			createFn: func(car *models.Car) error {
+				fmt.Println("car: ", car)
 				car.ID = "A1"
+				fmt.Println("car 2: ", car)
 				return nil
 			},
 			expectedStatus: http.StatusCreated,
@@ -447,13 +443,6 @@ func Test_Car_Update(t *testing.T) {
 			body:             `{"model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
 			expectedStatus:   http.StatusBadRequest,
 			expectedResponse: httpx.ErrorResponse{Message: "Invalid request body"},
-		},
-		{
-			name:             "body id mismatch",
-			idParam:          "ABC123",
-			body:             `{"id": "DEF456", "make":"Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
-			expectedStatus:   http.StatusBadRequest,
-			expectedResponse: httpx.ErrorResponse{Message: "ID in body does not match URL ID"},
 		},
 		{
 			name:    "car not found",
