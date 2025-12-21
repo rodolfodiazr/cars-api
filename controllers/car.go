@@ -37,7 +37,9 @@ func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := httpx.JSON(w, http.StatusOK, car); err != nil {
+	resp := dto.ToResponse(car)
+
+	if err := httpx.JSON(w, http.StatusOK, resp); err != nil {
 		log.Printf("error encoding car response: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
@@ -64,7 +66,9 @@ func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := httpx.JSON(w, http.StatusOK, cars); err != nil {
+	resp := dto.ToResponseList(cars)
+
+	if err := httpx.JSON(w, http.StatusOK, resp); err != nil {
 		log.Printf("error encoding cars response: %v", err)
 		httpx.HandleServiceError(w, err)
 		return
