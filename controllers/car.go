@@ -81,7 +81,7 @@ func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	err := httpx.DecodeJSON[dto.CreateCarRequest](r)
+	req, err := httpx.Decode[dto.CreateCarRequest](r)
 	if err != nil {
 		log.Printf("error decoding car payload: %v", err)
 		httpx.HandleServiceError(w, err)
@@ -113,7 +113,7 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 
 	id := chi.URLParam(r, "id")
 
-	req, err := httpx.DecodeAndValidate[dto.UpdateCarRequest](r)
+	req, err := httpx.Decode[dto.UpdateCarRequest](r)
 	if err != nil {
 		log.Printf("error decoding car payload: %v", err)
 		httpx.HandleServiceError(w, err)

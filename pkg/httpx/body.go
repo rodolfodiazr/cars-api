@@ -7,12 +7,12 @@ import (
 	"net/http"
 )
 
-// DecodeJSON decodes request body JSON into the provided struct.
-func DecodeJSON[T any](r *http.Request) (*T, error) {
+// Decode decodes request body JSON into the provided struct.
+func Decode[T any](r *http.Request) (*T, error) {
 	var req T
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return nil, e.NewBadRequestError(err)
+		return nil, e.NewInvalidRequestBodyError(err)
 	}
 
 	return &req, nil
