@@ -24,6 +24,20 @@ type Car struct {
 // Cars represents a collection of Car objects.
 type Cars []Car
 
+func (c Car) ValidateForCreate() error {
+	if c.ID != "" {
+		return errors.New("id must be empty on create")
+	}
+	return c.Validate()
+}
+
+func (c Car) ValidateForUpdate() error {
+	if strings.TrimSpace(c.ID) == "" {
+		return errors.New("id is required for update")
+	}
+	return c.Validate()
+}
+
 // Validate checks that all required fields in the Car struct are present and valid.
 func (c Car) Validate() error {
 	if strings.TrimSpace(c.Make) == "" {
