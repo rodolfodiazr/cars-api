@@ -9,9 +9,15 @@ import (
 
 // Decode decodes request body JSON into the provided struct.
 func Decode[T any](r *http.Request) (*T, error) {
-	var req T
+	if r.Body == nil {
+		return nil, e.NewInvalidRequestBodyError(e.ErrEmptyBody)
+	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	var req T
+	if err := dec.Decode(&req); err != nil {
 		return nil, e.NewInvalidRequestBodyError(err)
 	}
 
