@@ -37,7 +37,6 @@ func (s *DefaultCarService) Find(id string) (models.Car, error) {
 
 		return models.Car{}, err
 	}
-
 	return car, nil
 }
 
@@ -48,15 +47,19 @@ func (s *DefaultCarService) List(f models.CarFilters) (models.Cars, error) {
 
 // Create adds a new car to the repository.
 func (s *DefaultCarService) Create(car *models.Car) error {
-	if err := car.Validate(); err != nil {
+	if err := car.ValidateForCreate(); err != nil {
 		return e.NewValidationError(err)
 	}
-	return s.repo.Create(car)
+
+	if err := s.repo.Create(car); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Update updates a car in the repository.
 func (s *DefaultCarService) Update(car *models.Car) error {
-	if err := car.Validate(); err != nil {
+	if err := car.ValidateForUpdate(); err != nil {
 		return e.NewValidationError(err)
 	}
 
@@ -64,9 +67,7 @@ func (s *DefaultCarService) Update(car *models.Car) error {
 		if errors.Is(err, e.ErrCarNotFound) {
 			return e.NewCarNotFoundError(err)
 		}
-
 		return err
 	}
-
 	return nil
 }
