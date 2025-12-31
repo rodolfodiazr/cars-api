@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"cars/pkg/contextkeys"
 	"cars/pkg/logger"
 	"context"
 	"net/http"
@@ -8,10 +9,6 @@ import (
 
 	"github.com/google/uuid"
 )
-
-type ctxKey string
-
-const requestIDKey ctxKey = "requestID"
 
 type responseWriter struct {
 	http.ResponseWriter
@@ -39,7 +36,7 @@ func Logging(next http.Handler) http.Handler {
 		reqID := uuid.NewString()
 
 		// 1) Put request ID into context
-		ctx := context.WithValue(r.Context(), requestIDKey, reqID)
+		ctx := context.WithValue(r.Context(), contextkeys.RequestIDKey, reqID)
 		r = r.WithContext(ctx)
 
 		// 2) logger.WithLogger RETURNS context.Context, NOT *http.Request
