@@ -1,6 +1,5 @@
 package contextkeys
 
-// RequestIDKeyType prevents context key collisions.
-type RequestIDKeyType string
+type RequestIDKeyType struct{}
 
-const RequestIDKey RequestIDKeyType = "requestID"
+var RequestIDKey = RequestIDKeyType{}

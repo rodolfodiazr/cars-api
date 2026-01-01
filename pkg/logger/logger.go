@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"cars/pkg/contextkeys"
 	"context"
 	"fmt"
 	"log"
@@ -13,7 +14,15 @@ const loggerKey ctxKey = "logger"
 
 // WithLogger adds a logger to the context
 func WithLogger(r *http.Request) context.Context {
-	prefix := fmt.Sprintf("[method:%s path:%s] ",
+	reqID, _ := r.Context().Value(contextkeys.RequestIDKey).(string)
+
+	if reqID == "" {
+		reqID = "unknown"
+	}
+
+	prefix := fmt.Sprintf(
+		"[req:%s method:%s path:%s] ",
+		reqID,
 		r.Method,
 		r.URL.Path,
 	)

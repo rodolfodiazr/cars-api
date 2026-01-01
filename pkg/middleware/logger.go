@@ -53,8 +53,7 @@ func Logging(next http.Handler) http.Handler {
 		duration := time.Since(start)
 		log := logger.FromContext(ctx)
 
-		log.Printf("[req:%s] %d %s %s (%v)",
-			reqID,
+		log.Printf("%d %s %s (%v)",
 			rw.statusCode,
 			r.Method,
 			r.URL.Path,
