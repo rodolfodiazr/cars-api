@@ -13,17 +13,11 @@ type ErrorResponse struct {
 	Details string `json:"details,omitempty"`
 }
 
-type SuccessResponse struct {
-	Data any `json:"data,omitempty"`
-}
-
 func JSON(w http.ResponseWriter, status int, payload any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
-	return json.NewEncoder(w).Encode(SuccessResponse{
-		Data: payload,
-	})
+	return json.NewEncoder(w).Encode(payload)
 }
 
 func writeError(w http.ResponseWriter, err *e.ServiceError) {

@@ -77,15 +77,13 @@ func Test_Car_Get(t *testing.T) {
 				}, nil
 			},
 			expectedStatus: http.StatusOK,
-			expectedResponse: httpx.SuccessResponse{
-				Data: models.Car{
-					ID:       "ABC123",
-					Make:     "Chevrolet",
-					Model:    "Onix",
-					Color:    "Black",
-					Category: "Sedan",
-					Year:     2025,
-				},
+			expectedResponse: models.Car{
+				ID:       "ABC123",
+				Make:     "Chevrolet",
+				Model:    "Onix",
+				Color:    "Black",
+				Category: "Sedan",
+				Year:     2025,
 			},
 		},
 	}
@@ -125,23 +123,13 @@ func Test_Car_Get(t *testing.T) {
 				if got.Message != expected.Message {
 					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
 				}
-			case httpx.SuccessResponse:
-				var got httpx.SuccessResponse
-				if err := json.Unmarshal(body, &got); err != nil {
+			case models.Car:
+				var gotCar models.Car
+				if err := json.Unmarshal(body, &gotCar); err != nil {
 					t.Fatal(err)
 				}
 
-				gotDataBytes, err := json.Marshal(got.Data)
-				if err != nil {
-					t.Fatal(err)
-				}
-
-				gotCar := models.Car{}
-				if err := json.Unmarshal(gotDataBytes, &gotCar); err != nil {
-					t.Fatal(err)
-				}
-
-				expectedCar := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Car)
+				expectedCar := tc.expectedResponse
 				if !reflect.DeepEqual(gotCar, expectedCar) {
 					t.Fatalf("expected car %+v, got %+v", expectedCar, gotCar)
 				}
@@ -168,12 +156,10 @@ func Test_Car_List(t *testing.T) {
 				}, nil
 			},
 			expectedStatus: http.StatusOK,
-			expectedResponse: httpx.SuccessResponse{
-				Data: models.Cars{
-					{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: "ABC", Color: "Black", Category: "Sedan", Year: 2025},
-					{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: "DEF", Color: "Red", Category: "Sedan", Year: 2025},
-					{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: "GHI", Color: "White", Category: "Sedan", Year: 2025},
-				},
+			expectedResponse: models.Cars{
+				{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: "ABC", Color: "Black", Category: "Sedan", Year: 2025},
+				{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: "DEF", Color: "Red", Category: "Sedan", Year: 2025},
+				{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: "GHI", Color: "White", Category: "Sedan", Year: 2025},
 			},
 		},
 		{
@@ -227,23 +213,13 @@ func Test_Car_List(t *testing.T) {
 				if got.Message != expected.Message {
 					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
 				}
-			case httpx.SuccessResponse:
-				var got httpx.SuccessResponse
-				if err := json.Unmarshal(body, &got); err != nil {
-					t.Fatal(err)
-				}
-
-				gotDataBytes, err := json.Marshal(got.Data)
-				if err != nil {
-					t.Fatal(err)
-				}
-
+			case models.Cars:
 				var gotCars models.Cars
-				if err := json.Unmarshal(gotDataBytes, &gotCars); err != nil {
+				if err := json.Unmarshal(body, &gotCars); err != nil {
 					t.Fatal(err)
 				}
 
-				expectedCars := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Cars)
+				expectedCars := tc.expectedResponse.(models.Cars)
 				if len(gotCars) != len(expectedCars) {
 					t.Fatalf("expected %d cars, got %d", len(expectedCars), len(gotCars))
 				}
@@ -319,15 +295,13 @@ func Test_Car_Create(t *testing.T) {
 				return nil
 			},
 			expectedStatus: http.StatusCreated,
-			expectedResponse: httpx.SuccessResponse{
-				Data: models.Car{
-					ID:       "A1",
-					Make:     "Chevrolet",
-					Model:    "Onix",
-					Color:    "Gray",
-					Category: "Sedan",
-					Year:     2025,
-				},
+			expectedResponse: models.Car{
+				ID:       "A1",
+				Make:     "Chevrolet",
+				Model:    "Onix",
+				Color:    "Gray",
+				Category: "Sedan",
+				Year:     2025,
 			},
 		},
 	}
@@ -368,23 +342,13 @@ func Test_Car_Create(t *testing.T) {
 				if got.Message != expected.Message {
 					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
 				}
-			case httpx.SuccessResponse:
-				var got httpx.SuccessResponse
-				if err := json.Unmarshal(body, &got); err != nil {
-					t.Fatal(err)
-				}
-
-				gotDataBytes, err := json.Marshal(got.Data)
-				if err != nil {
-					t.Fatal(err)
-				}
-
+			case models.Car:
 				var gotCar models.Car
-				if err := json.Unmarshal(gotDataBytes, &gotCar); err != nil {
+				if err := json.Unmarshal(body, &gotCar); err != nil {
 					t.Fatal(err)
 				}
 
-				expectedCar := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Car)
+				expectedCar := tc.expectedResponse.(models.Car)
 				if !reflect.DeepEqual(gotCar, expectedCar) {
 					t.Fatalf("expected car %+v, got %+v", expectedCar, gotCar)
 				}
@@ -472,15 +436,13 @@ func Test_Car_Update(t *testing.T) {
 				return nil
 			},
 			expectedStatus: http.StatusOK,
-			expectedResponse: httpx.SuccessResponse{
-				Data: models.Car{
-					ID:       "ABC123",
-					Make:     "Chevrolet",
-					Model:    "Onix",
-					Color:    "Gray",
-					Category: "Sedan",
-					Year:     2025},
-			},
+			expectedResponse: models.Car{
+				ID:       "ABC123",
+				Make:     "Chevrolet",
+				Model:    "Onix",
+				Color:    "Gray",
+				Category: "Sedan",
+				Year:     2025},
 		},
 	}
 
@@ -520,23 +482,13 @@ func Test_Car_Update(t *testing.T) {
 				if got.Message != expected.Message {
 					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
 				}
-			case httpx.SuccessResponse:
-				var got httpx.SuccessResponse
-				if err := json.Unmarshal(body, &got); err != nil {
-					t.Fatal(err)
-				}
-
-				gotDataBytes, err := json.Marshal(got.Data)
-				if err != nil {
-					t.Fatal(err)
-				}
-
+			case models.Car:
 				var gotCar models.Car
-				if err := json.Unmarshal(gotDataBytes, &gotCar); err != nil {
+				if err := json.Unmarshal(body, &gotCar); err != nil {
 					t.Fatal(err)
 				}
 
-				expectedCar := tc.expectedResponse.(httpx.SuccessResponse).Data.(models.Car)
+				expectedCar := tc.expectedResponse.(models.Car)
 				if !reflect.DeepEqual(gotCar, expectedCar) {
 					t.Fatalf("expected car %+v, got %+v", expectedCar, gotCar)
 				}
