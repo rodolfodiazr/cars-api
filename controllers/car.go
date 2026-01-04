@@ -108,6 +108,15 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 // Update handles updating an existing car.
+//
+// This endpoint performs a FULL replacement of the car resource.
+// All fields must be provided in the request body.
+//
+// Any field omitted from the request will be reset to its zero value.
+// Partial updates are NOT supported.
+//
+// Method: PUT
+// Path: /cars/{id}
 func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 

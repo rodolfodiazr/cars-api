@@ -29,6 +29,10 @@ func Register() *chi.Mux {
 
 		r.Route("/{id:[A-Za-z0-9-]+}", func(r chi.Router) {
 			r.Get("/", cars.Get)
+
+			// PUT /cars/{id}
+			// Performs a full replacement of the car resource.
+			// All fields must be provided; partial updates are not supported.
 			r.Put("/", cars.Update)
 		})
 	})

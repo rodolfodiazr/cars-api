@@ -57,7 +57,8 @@ func (s *DefaultCarService) Create(car *models.Car) error {
 	return nil
 }
 
-// Update updates a car in the repository.
+// Update replaces an existing car with the provided data.
+// The car must contain all required fields and a valid ID.
 func (s *DefaultCarService) Update(car *models.Car) error {
 	if err := car.ValidateForUpdate(); err != nil {
 		return e.NewValidationError(err)
