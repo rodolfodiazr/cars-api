@@ -49,10 +49,14 @@ func (r *DefaultCarRepository) Find(id string) (models.Car, error) {
 // List returns all stored cars.
 func (r *DefaultCarRepository) List(f models.CarFilters) (models.Cars, error) {
 	r.mu.RLock()
-	defer r.mu.RUnlock()
+	cars := make([]models.Car, 0, len(r.cars))
+	for _, car := range r.cars {
+		cars = append(cars, car)
+	}
+	r.mu.RUnlock()
 
 	var list models.Cars
-	for _, car := range r.cars {
+	for _, car := range cars {
 		if f.Make != "" && !strings.EqualFold(car.Make, f.Make) {
 			continue
 		}
@@ -75,9 +79,10 @@ func (r *DefaultCarRepository) Create(car *models.Car) error {
 	}
 
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	car.ID = id
 	r.cars[car.ID] = *car
-	r.mu.Unlock()
 
 	return nil
 }
