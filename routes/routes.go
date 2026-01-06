@@ -25,6 +25,10 @@ func Register() *chi.Mux {
 
 	r.Route("/cars", func(r chi.Router) {
 		r.Get("/", cars.List)
+
+		// POST /cars
+		// Creates a new car.
+		// All required fields must be provided in the request body.
 		r.Post("/", cars.Create)
 
 		r.Route("/{id:[A-Za-z0-9-]+}", func(r chi.Router) {
