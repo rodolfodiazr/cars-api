@@ -32,6 +32,8 @@ func Register() *chi.Mux {
 		r.Post("/", cars.Create)
 
 		r.Route("/{id:[A-Za-z0-9-]+}", func(r chi.Router) {
+			// GET /cars/{id}
+			// Retrieves a car by its ID.
 			r.Get("/", cars.Get)
 
 			// PUT /cars/{id}
