@@ -24,6 +24,9 @@ func Register() *chi.Mux {
 	r.Use(middleware.Logging)
 
 	r.Route("/cars", func(r chi.Router) {
+		// GET /cars
+		// Retrieves a list of cars.
+		// Supports optional query parameters for filtering.
 		r.Get("/", cars.List)
 
 		// POST /cars
