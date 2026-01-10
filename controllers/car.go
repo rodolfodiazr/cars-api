@@ -49,6 +49,9 @@ func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 // List handles retrieving all available cars.
+//
+// Method: GET
+// Path: /cars
 func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
