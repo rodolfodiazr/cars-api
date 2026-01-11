@@ -25,6 +25,11 @@ func NewCarController(service services.CarService) *CarController {
 }
 
 // Get handles retrieving a car by its ID.
+//
+// Returns the car with the given ID, or a 404 error if the car is not found.
+//
+// Method: GET
+// Path: /cars/{id}
 func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
