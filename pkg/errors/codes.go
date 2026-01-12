@@ -2,6 +2,9 @@ package errors
 
 const (
 	// General
+	CodeInternalError = "INTERNAL_ERROR"
+	MsgInternalError  = "Internal server error"
+
 	CodeInvalidRequestBody = "INVALID_REQUEST_BODY"
 	MsgInvalidRequestBody  = "Invalid request body"
 

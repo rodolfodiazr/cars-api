@@ -32,18 +32,15 @@ func writeError(w http.ResponseWriter, err *e.ServiceError) {
 }
 
 func HandleServiceError(w http.ResponseWriter, err error) {
-	var serviceError *e.ServiceError
+	if err == nil {
+		return
+	}
 
+	var serviceError *e.ServiceError
 	if errors.As(err, &serviceError) {
 		writeError(w, serviceError)
 		return
 	}
 
-	// Unexpected errors
-	writeError(w, &e.ServiceError{
-		StatusCode: http.StatusInternalServerError,
-		Code:       "INTERNAL_ERROR",
-		Message:    "Internal server error",
-		Err:        err,
-	})
+	writeError(w, e.NewInternalError(err))
 }

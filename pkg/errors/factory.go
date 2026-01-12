@@ -12,6 +12,10 @@ func wrap(code string, status int, message string, err error) *ServiceError {
 }
 
 // General Errors
+func NewInternalError(err error) *ServiceError {
+	return wrap(CodeInternalError, http.StatusInternalServerError, MsgInternalError, err)
+}
+
 func NewInvalidRequestBodyError(err error) *ServiceError {
 	return wrap(CodeInvalidRequestBody, http.StatusBadRequest, MsgInvalidRequestBody, err)
 }
