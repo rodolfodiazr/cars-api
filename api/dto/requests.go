@@ -12,7 +12,7 @@ type CarUpsertRequest struct {
 	Year     int    `json:"year"`
 
 	Mileage float64 `json:"mileage"`
-	Price   float64 `json:"price"`
+	Price   int64   `json:"price"`
 }
 
 type CreateCarRequest = CarUpsertRequest

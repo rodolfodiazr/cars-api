@@ -18,7 +18,7 @@ type Car struct {
 	Year     int    // Manufacturing year of the car.
 
 	Mileage float64 // Distance the car has traveled, measured in miles.
-	Price   float64 // Price of the car in cents.
+	Price   int64   // Price of the car in cents.
 }
 
 // Cars represents a collection of Car objects.

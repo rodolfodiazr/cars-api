@@ -12,5 +12,5 @@ type CarResponse struct {
 	Year     int    `json:"year"`
 
 	Mileage float64 `json:"mileage,omitempty"`
-	Price   float64 `json:"price,omitempty"`
+	Price   int64   `json:"price,omitempty"`
 }
