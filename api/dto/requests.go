@@ -11,8 +11,8 @@ type CarUpsertRequest struct {
 	Category string `json:"category"`
 	Year     int    `json:"year"`
 
-	Mileage float64 `json:"mileage"`
-	Price   int64   `json:"price"`
+	Mileage int64 `json:"mileage"`
+	Price   int64 `json:"price"`
 }
 
 type CreateCarRequest = CarUpsertRequest
