@@ -3,21 +3,18 @@ package dto
 import "cars/models"
 
 func ToModelCreate(req CreateCarRequest) *models.Car {
-	return &models.Car{
-		Make:     req.Make,
-		Model:    req.Model,
-		Package:  req.Package,
-		Color:    req.Color,
-		Category: req.Category,
-		Year:     req.Year,
-		Mileage:  req.Mileage,
-		Price:    req.Price,
-	}
+	car := toModel(req)
+	return car
 }
 
 func ToModelUpdate(id string, req UpdateCarRequest) *models.Car {
+	car := toModel(req)
+	car.ID = id
+	return car
+}
+
+func toModel(req CarUpsertRequest) *models.Car {
 	return &models.Car{
-		ID:       id,
 		Make:     req.Make,
 		Model:    req.Model,
 		Package:  req.Package,
