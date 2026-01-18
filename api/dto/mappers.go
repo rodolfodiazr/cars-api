@@ -3,8 +3,7 @@ package dto
 import "cars/models"
 
 func ToModelCreate(req CreateCarRequest) *models.Car {
-	car := toModel(req)
-	return car
+	return toModel(req)
 }
 
 func ToModelUpdate(id string, req UpdateCarRequest) *models.Car {
@@ -26,7 +25,7 @@ func toModel(req CarUpsertRequest) *models.Car {
 	}
 }
 
-func ToResponse(car models.Car) CarResponse {
+func ToResponse(car *models.Car) CarResponse {
 	return CarResponse{
 		ID:       car.ID,
 		Make:     car.Make,
@@ -42,8 +41,8 @@ func ToResponse(car models.Car) CarResponse {
 
 func ToResponseList(cars models.Cars) []CarResponse {
 	out := make([]CarResponse, 0, len(cars))
-	for _, car := range cars {
-		out = append(out, ToResponse(car))
+	for i := range cars {
+		out = append(out, ToResponse(&cars[i]))
 	}
 	return out
 }
