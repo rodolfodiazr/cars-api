@@ -42,7 +42,7 @@ func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := dto.ToResponse(car)
+	resp := dto.ToResponse(&car)
 
 	if err := httpx.JSON(w, http.StatusOK, resp); err != nil {
 		log.Printf("error encoding car response: %v", err)
@@ -110,7 +110,7 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := dto.ToResponse(*car)
+	resp := dto.ToResponse(car)
 
 	if err := httpx.JSON(w, http.StatusCreated, resp); err != nil {
 		log.Printf("error encoding created car response: %v", err)
@@ -151,7 +151,7 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := dto.ToResponse(*car)
+	resp := dto.ToResponse(car)
 
 	if err := httpx.JSON(w, http.StatusOK, resp); err != nil {
 		log.Printf("error encoding updated car response: %v", err)
