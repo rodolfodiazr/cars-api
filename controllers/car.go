@@ -11,6 +11,8 @@ import (
 	"net/url"
 	"strconv"
 
+	e "cars/pkg/errors"
+
 	"github.com/go-chi/chi/v5"
 )
 
@@ -172,7 +174,7 @@ func parseCarFilters(q url.Values) (models.CarFilters, error) {
 	if yearStr := q.Get("year"); yearStr != "" {
 		year, err := strconv.Atoi(yearStr)
 		if err != nil {
-			return f, fmt.Errorf("invalid year: %q", yearStr)
+			return f, e.NewValidationError(fmt.Errorf("invalid year: %q", yearStr))
 		}
 		f.Year = year
 	}
