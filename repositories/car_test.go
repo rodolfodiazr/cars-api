@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"cars/models"
+	u "cars/pkg/utils"
 	"testing"
 )
 
@@ -10,27 +11,27 @@ func TestDefaultCarRepository_List(t *testing.T) {
 	cars := map[string]models.Car{
 		"1": {
 			ID:   "1",
-			Make: "Ford", Model: "F10", Package: "Base",
+			Make: "Ford", Model: "F10", Package: u.Ptr("Base"),
 			Color: "Silver", Year: 2010, Category: "Truck",
-			Mileage: 120123, Price: 1999900,
+			Mileage: u.Ptr(int64(120123)), Price: u.Ptr(int64(1999900)),
 		},
 		"2": {
 			ID:   "2",
-			Make: "Toyota", Model: "Camry", Package: "SE",
+			Make: "Toyota", Model: "Camry", Package: u.Ptr("SE"),
 			Color: "White", Year: 2019, Category: "Sedan",
-			Mileage: 3999, Price: 2899000,
+			Mileage: u.Ptr(int64(3999)), Price: u.Ptr(int64(2899000)),
 		},
 		"3": {
 			ID:   "3",
-			Make: "Toyota", Model: "Rav4", Package: "XSE",
+			Make: "Toyota", Model: "Rav4", Package: u.Ptr("XSE"),
 			Color: "Red", Year: 2018, Category: "SUV",
-			Mileage: 24001, Price: 2275000,
+			Mileage: u.Ptr(int64(24001)), Price: u.Ptr(int64(2275000)),
 		},
 		"4": {
 			ID:   "4",
-			Make: "Ford", Model: "Bronco", Package: "Badlands",
+			Make: "Ford", Model: "Bronco", Package: u.Ptr("Badlands"),
 			Color: "Burnt Orange", Year: 2022, Category: "SUV",
-			Mileage: 0, Price: 4499000,
+			Mileage: u.Ptr(int64(0)), Price: u.Ptr(int64(4499000)),
 		},
 	}
 

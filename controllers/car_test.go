@@ -4,6 +4,7 @@ import (
 	"cars/models"
 	e "cars/pkg/errors"
 	"cars/pkg/httpx"
+	u "cars/pkg/utils"
 	"cars/services"
 	"encoding/json"
 	"errors"
@@ -150,23 +151,23 @@ func Test_Car_List(t *testing.T) {
 			name: "list with 3 cars",
 			listFn: func(f models.CarFilters) (models.Cars, error) {
 				return models.Cars{
-					{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: "ABC", Color: "Black", Category: "Sedan", Year: 2025},
-					{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: "DEF", Color: "Red", Category: "Sedan", Year: 2025},
-					{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: "GHI", Color: "White", Category: "Sedan", Year: 2025},
+					{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: u.Ptr("ABC"), Color: "Black", Category: "Sedan", Year: 2025},
+					{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: u.Ptr("DEF"), Color: "Red", Category: "Sedan", Year: 2025},
+					{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: u.Ptr("GHI"), Color: "White", Category: "Sedan", Year: 2025},
 				}, nil
 			},
 			expectedStatus: http.StatusOK,
 			expectedResponse: models.Cars{
-				{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: "ABC", Color: "Black", Category: "Sedan", Year: 2025},
-				{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: "DEF", Color: "Red", Category: "Sedan", Year: 2025},
-				{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: "GHI", Color: "White", Category: "Sedan", Year: 2025},
+				{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: u.Ptr("ABC"), Color: "Black", Category: "Sedan", Year: 2025},
+				{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: u.Ptr("DEF"), Color: "Red", Category: "Sedan", Year: 2025},
+				{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: u.Ptr("GHI"), Color: "White", Category: "Sedan", Year: 2025},
 			},
 		},
 		{
 			name:             "invalid params",
 			queryParams:      "?year=MMXXV",
-			expectedStatus:   http.StatusInternalServerError,
-			expectedResponse: httpx.ErrorResponse{Message: "Internal server error"},
+			expectedStatus:   http.StatusBadRequest,
+			expectedResponse: httpx.ErrorResponse{Message: "Validation failed"},
 		},
 		{
 			name: "repository error",
