@@ -60,5 +60,17 @@ func (c Car) Validate() error {
 	if c.Year <= 0 || c.Year > currentYear {
 		return errors.New("year is not valid")
 	}
+
+	if c.Mileage != nil {
+		if *c.Mileage < 0 {
+			return errors.New("mileage cannot be negative")
+		}
+	}
+
+	if c.Price != nil {
+		if *c.Price < 0 {
+			return errors.New("price cannot be negative")
+		}
+	}
 	return nil
 }
