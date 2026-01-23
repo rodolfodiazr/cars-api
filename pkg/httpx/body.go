@@ -17,16 +17,16 @@ func Decode[T any](r *http.Request) (*T, error) {
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 
-	var raw map[string]any
-	if err := dec.Decode(&raw); err != nil {
+	var payload map[string]any
+	if err := dec.Decode(&payload); err != nil {
 		return nil, e.NewInvalidRequestBodyError(err)
 	}
 
-	if len(raw) == 0 {
+	if len(payload) == 0 {
 		return nil, e.NewInvalidRequestBodyError(e.ErrEmptyBody)
 	}
 
-	data, err := json.Marshal(raw)
+	data, err := json.Marshal(payload)
 	if err != nil {
 		return nil, e.NewInvalidRequestBodyError(err)
 	}
