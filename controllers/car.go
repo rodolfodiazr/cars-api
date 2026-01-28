@@ -6,7 +6,6 @@ import (
 	"cars/pkg/httpx"
 	"cars/pkg/logger"
 	"cars/services"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -39,7 +38,7 @@ func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		httpx.HandleServiceError(w, e.NewValidationError(errors.New("id is required")))
+		httpx.HandleServiceError(w, e.NewValidationError(e.ErrIDRequired))
 		return
 	}
 
@@ -145,7 +144,7 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		httpx.HandleServiceError(w, e.NewValidationError(errors.New("id is required")))
+		httpx.HandleServiceError(w, e.NewValidationError(e.ErrIDRequired))
 		return
 	}
 

@@ -8,4 +8,6 @@ var (
 	ErrUnexpectedJSONData  = errors.New("unexpected data after JSON object")
 
 	ErrCarNotFound = errors.New("car not found")
+
+	ErrIDRequired = errors.New("id is required")
 )
