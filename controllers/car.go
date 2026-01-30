@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	e "cars/pkg/errors"
 
@@ -35,7 +36,7 @@ func NewCarController(service services.CarService) *CarController {
 func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	id := chi.URLParam(r, "id")
+	id := strings.TrimSpace(chi.URLParam(r, "id"))
 
 	if id == "" {
 		httpx.HandleServiceError(w, e.NewValidationError(e.ErrIDRequired))
@@ -141,7 +142,7 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	id := chi.URLParam(r, "id")
+	id := strings.TrimSpace(chi.URLParam(r, "id"))
 
 	if id == "" {
 		httpx.HandleServiceError(w, e.NewValidationError(e.ErrIDRequired))

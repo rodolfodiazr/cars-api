@@ -2,7 +2,6 @@ package dto
 
 import (
 	"cars/models"
-	"strings"
 )
 
 func ToModelCreate(req CreateCarRequest) *models.Car {
@@ -11,7 +10,7 @@ func ToModelCreate(req CreateCarRequest) *models.Car {
 
 func ToModelUpdate(id string, req UpdateCarRequest) *models.Car {
 	car := toModel(req)
-	car.ID = strings.TrimSpace(id)
+	car.ID = id
 	return car
 }
 
