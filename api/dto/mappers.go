@@ -28,6 +28,10 @@ func toModel(req CarUpsertRequest) *models.Car {
 }
 
 func ToResponse(car *models.Car) CarResponse {
+	if car == nil {
+		return CarResponse{}
+	}
+
 	return CarResponse{
 		ID:       car.ID,
 		Make:     car.Make,
