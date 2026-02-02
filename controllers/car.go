@@ -68,6 +68,10 @@ func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
+	// Supported query params:
+	// - make
+	// - model
+	// - year (0 or omitted means no year filter)
 	filters, err := parseCarFilters(r.URL.Query())
 	if err != nil {
 		log.Printf("error parsing car filters: %v", err)
