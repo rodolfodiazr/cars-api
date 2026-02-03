@@ -179,6 +179,16 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	log.Printf("car updated id=%s", id)
 }
 
+// Method: DELETE
+// Path: /cars/{id}
+func (c *CarController) Delete(w http.ResponseWriter, r *http.Request) {
+	log := logger.FromContext(r.Context())
+
+	id := strings.TrimSpace(chi.URLParam(r, "id"))
+
+	log.Printf("car deleted id=%s", id)
+}
+
 // parseCarFilters converts URL query parameters into a CarFilters struct.
 func parseCarFilters(q url.Values) (models.CarFilters, error) {
 	f := models.CarFilters{

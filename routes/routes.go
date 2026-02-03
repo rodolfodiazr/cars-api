@@ -43,6 +43,10 @@ func Register() *chi.Mux {
 			// Performs a full replacement of the car resource.
 			// All fields must be provided; partial updates are not supported.
 			r.Put("/", cars.Update)
+
+			// DELETE /cars/{id}
+			// Deletes a car by its ID.
+			r.Delete("/", cars.Delete)
 		})
 	})
 	return r
