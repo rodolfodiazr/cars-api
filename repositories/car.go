@@ -14,6 +14,7 @@ type CarRepository interface {
 	List(filters models.CarFilters) (models.Cars, error)
 	Create(car *models.Car) error
 	Update(car *models.Car) error
+	Delete(id string) error
 }
 
 // DefaultCarRepository is an in-memory implementation of CarRepository.
@@ -95,5 +96,21 @@ func (r *DefaultCarRepository) Update(car *models.Car) error {
 	}
 
 	r.cars[car.ID] = *car
+	return nil
+}
+
+func (r *DefaultCarRepository) Delete(id string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	currentCars := r.cars
+	r.cars = make(map[string]models.Car, len(currentCars))
+	for carID, c := range currentCars {
+		if id == carID {
+			continue
+		}
+
+		r.cars[carID] = c
+	}
 	return nil
 }

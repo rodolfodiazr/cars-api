@@ -13,6 +13,7 @@ type CarService interface {
 	List(filters models.CarFilters) (models.Cars, error)
 	Create(car *models.Car) error
 	Update(car *models.Car) error
+	Delete(id string) error
 }
 
 // DefaultCarService is the default implementation of CarService.
@@ -69,6 +70,16 @@ func (s *DefaultCarService) Update(car *models.Car) error {
 	}
 
 	if err := s.repo.Update(car); err != nil {
+		if errors.Is(err, e.ErrCarNotFound) {
+			return e.NewCarNotFoundError(err)
+		}
+		return e.NewInternalError(err)
+	}
+	return nil
+}
+
+func (s *DefaultCarService) Delete(id string) error {
+	if err := s.repo.Delete(id); err != nil {
 		if errors.Is(err, e.ErrCarNotFound) {
 			return e.NewCarNotFoundError(err)
 		}

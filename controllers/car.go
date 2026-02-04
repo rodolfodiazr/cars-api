@@ -186,6 +186,17 @@ func (c *CarController) Delete(w http.ResponseWriter, r *http.Request) {
 
 	id := strings.TrimSpace(chi.URLParam(r, "id"))
 
+	if err := c.service.Delete(id); err != nil {
+		httpx.HandleServiceError(w, err)
+		return
+	}
+
+	if err := httpx.JSON(w, http.StatusNoContent, nil); err != nil {
+		log.Printf("error encoding delete car response: %v", err)
+		httpx.HandleServiceError(w, err)
+		return
+	}
+
 	log.Printf("car deleted id=%s", id)
 }
 
