@@ -103,14 +103,10 @@ func (r *DefaultCarRepository) Delete(id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	currentCars := r.cars
-	r.cars = make(map[string]models.Car, len(currentCars))
-	for carID, c := range currentCars {
-		if id == carID {
-			continue
-		}
-
-		r.cars[carID] = c
+	if _, ok := r.cars[id]; !ok {
+		return e.ErrCarNotFound
 	}
+
+	delete(r.cars, id)
 	return nil
 }
