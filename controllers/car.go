@@ -191,13 +191,8 @@ func (c *CarController) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := httpx.JSON(w, http.StatusNoContent, nil); err != nil {
-		log.Printf("error encoding delete car response: %v", err)
-		httpx.HandleServiceError(w, err)
-		return
-	}
-
 	log.Printf("car deleted id=%s", id)
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // parseCarFilters converts URL query parameters into a CarFilters struct.
