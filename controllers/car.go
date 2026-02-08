@@ -186,6 +186,11 @@ func (c *CarController) Delete(w http.ResponseWriter, r *http.Request) {
 
 	id := strings.TrimSpace(chi.URLParam(r, "id"))
 
+	if id == "" {
+		httpx.HandleServiceError(w, e.NewValidationError(e.ErrIDRequired))
+		return
+	}
+
 	if err := c.service.Delete(id); err != nil {
 		httpx.HandleServiceError(w, err)
 		return
