@@ -179,6 +179,7 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	log.Printf("car updated id=%s", id)
 }
 
+// Delete handles the HTTP DELETE request to remove a car by its ID.
 // Method: DELETE
 // Path: /cars/{id}
 func (c *CarController) Delete(w http.ResponseWriter, r *http.Request) {
