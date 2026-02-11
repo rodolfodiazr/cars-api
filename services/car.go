@@ -78,6 +78,7 @@ func (s *DefaultCarService) Update(car *models.Car) error {
 	return nil
 }
 
+// Delete removes a car identified by the given ID.
 func (s *DefaultCarService) Delete(id string) error {
 	if err := s.repo.Delete(id); err != nil {
 		if errors.Is(err, e.ErrCarNotFound) {
