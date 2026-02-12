@@ -99,6 +99,7 @@ func (r *DefaultCarRepository) Update(car *models.Car) error {
 	return nil
 }
 
+// Delete removes a car identified by the given id from the repository.
 func (r *DefaultCarRepository) Delete(id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
