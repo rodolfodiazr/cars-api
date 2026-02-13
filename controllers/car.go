@@ -179,7 +179,14 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	log.Printf("car updated id=%s", id)
 }
 
-// Delete handles the HTTP DELETE request to remove a car by its ID.
+// Delete handles removing an existing car.
+//
+// This endpoint permanently deletes the car resource identified by its ID.
+// The operation is irreversible once completed.
+//
+// A valid non-empty ID must be provided in the path parameter.
+// If the ID is missing or the car does not exist, an error is returned.
+//
 // Method: DELETE
 // Path: /cars/{id}
 func (c *CarController) Delete(w http.ResponseWriter, r *http.Request) {
