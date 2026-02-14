@@ -10,3 +10,4 @@ This API enables clients to:
 - ➕ **Create** a new car
 - 🔍 **Retrieve** a car by ID
 - ✏️ **Update** a car by ID
+- 🗑️ **Delete** a car by ID.
