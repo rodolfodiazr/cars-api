@@ -23,6 +23,7 @@ type MockCarRepository struct {
 	ListFn   func(filters models.CarFilters) (models.Cars, error)
 	CreateFn func(car *models.Car) error
 	UpdateFn func(car *models.Car) error
+	DeleteFn func(id string) error
 }
 
 func (m *MockCarRepository) Find(id string) (models.Car, error) {
@@ -36,6 +37,10 @@ func (m *MockCarRepository) Create(car *models.Car) error {
 }
 func (m *MockCarRepository) Update(car *models.Car) error {
 	return m.UpdateFn(car)
+}
+
+func (m *MockCarRepository) Delete(id string) error {
+	return m.DeleteFn(id)
 }
 
 func Test_Car_Get(t *testing.T) {
