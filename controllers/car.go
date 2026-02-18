@@ -200,6 +200,7 @@ func (c *CarController) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := c.service.Delete(id); err != nil {
+		log.Printf("error deleting car id=%s: %v", id, err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
