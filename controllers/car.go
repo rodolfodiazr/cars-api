@@ -146,10 +146,9 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	id := strings.TrimSpace(chi.URLParam(r, "id"))
-
-	if id == "" {
-		httpx.HandleServiceError(w, e.NewValidationError(e.ErrIDRequired))
+	id, err := getIDParam(r)
+	if err != nil {
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
@@ -207,6 +206,14 @@ func (c *CarController) Delete(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("car deleted id=%s", id)
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func getIDParam(r *http.Request) (string, error) {
+	id := strings.TrimSpace(chi.URLParam(r, "id"))
+	if id == "" {
+		return "", e.NewValidationError(e.ErrIDRequired)
+	}
+	return id, nil
 }
 
 // parseCarFilters converts URL query parameters into a CarFilters struct.
