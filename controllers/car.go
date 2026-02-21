@@ -190,10 +190,9 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 func (c *CarController) Delete(w http.ResponseWriter, r *http.Request) {
 	log := logger.FromContext(r.Context())
 
-	id := strings.TrimSpace(chi.URLParam(r, "id"))
-
-	if id == "" {
-		httpx.HandleServiceError(w, e.NewValidationError(e.ErrIDRequired))
+	id, err := getIDParam(r)
+	if err != nil {
+		httpx.HandleServiceError(w, err)
 		return
 	}
 
