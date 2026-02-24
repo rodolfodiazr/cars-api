@@ -28,18 +28,18 @@ func (c Car) ValidateForCreate() error {
 	if c.ID != "" {
 		return errors.New("id must be empty on create")
 	}
-	return c.Validate()
+	return c.validate()
 }
 
 func (c Car) ValidateForUpdate() error {
 	if strings.TrimSpace(c.ID) == "" {
 		return errors.New("id is required for update")
 	}
-	return c.Validate()
+	return c.validate()
 }
 
 // Validate checks that all required fields in the Car struct are present and valid.
-func (c Car) Validate() error {
+func (c Car) validate() error {
 	if strings.TrimSpace(c.Make) == "" {
 		return errors.New("make is required")
 	}

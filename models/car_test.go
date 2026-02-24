@@ -97,7 +97,7 @@ func Test_Car_Validate(t *testing.T) {
 
 	for _, tCase := range tCases {
 		t.Run(tCase.name, func(t *testing.T) {
-			got := tCase.car.Validate()
+			got := tCase.car.validate()
 			expected := tCase.expectedError
 
 			if (got == nil && expected != nil) ||
