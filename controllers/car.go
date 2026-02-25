@@ -123,6 +123,7 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 
 	resp := dto.ToResponse(car)
 
+	w.Header().Set("Location", fmt.Sprintf("/cars/%s", car.ID))
 	if err := httpx.JSON(w, http.StatusCreated, resp); err != nil {
 		log.Printf("error encoding created car response: %v", err)
 		httpx.HandleServiceError(w, err)
