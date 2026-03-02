@@ -15,6 +15,10 @@ var (
 	// without providing an ID. An ID is required to identify the existing
 	// resource being modified.
 	ErrCarIDRequiredForUpdate = errors.New("id is required for update")
+
+	// ErrCarMakeRequired is returned when a car is validated without a make.
+	// The make field is mandatory for both creation and update operations.
+	ErrCarMakeRequired = errors.New("make is required")
 )
 
 // Car represents a vehicle with various attributes such as make, model, package, color, category, year, mileage, and price.
@@ -52,7 +56,7 @@ func (c Car) ValidateForUpdate() error {
 // Validate checks that all required fields in the Car struct are present and valid.
 func (c Car) validate() error {
 	if strings.TrimSpace(c.Make) == "" {
-		return errors.New("make is required")
+		return ErrCarMakeRequired
 	}
 
 	if strings.TrimSpace(c.Model) == "" {
