@@ -19,6 +19,10 @@ var (
 	// ErrCarMakeRequired is returned when a car is validated without a make.
 	// The make field is mandatory for both creation and update operations.
 	ErrCarMakeRequired = errors.New("make is required")
+
+	// ErrCarModelRequired is returned when a car is validated without a model.
+	// The model field is mandatory for both creation and update operations.
+	ErrCarModelRequired = errors.New("model is required")
 )
 
 // Car represents a vehicle with various attributes such as make, model, package, color, category, year, mileage, and price.
@@ -60,7 +64,7 @@ func (c Car) validate() error {
 	}
 
 	if strings.TrimSpace(c.Model) == "" {
-		return errors.New("model is required")
+		return ErrCarModelRequired
 	}
 
 	if strings.TrimSpace(c.Color) == "" {
