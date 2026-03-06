@@ -27,6 +27,10 @@ var (
 	// ErrCarColorRequired is returned when a car is validated without a color.
 	// The color field is mandatory for both creation and update operations.
 	ErrCarColorRequired = errors.New("color is required")
+
+	// ErrCarCategoryRequired is returned when a car is validated without a category.
+	// The category field is mandatory for both creation and update operations.
+	ErrCarCategoryRequired = errors.New("category is required")
 )
 
 // Car represents a vehicle with various attributes such as make, model, package, color, category, year, mileage, and price.
@@ -76,7 +80,7 @@ func (c Car) validate() error {
 	}
 
 	if strings.TrimSpace(c.Category) == "" {
-		return errors.New("category is required")
+		return ErrCarCategoryRequired
 	}
 
 	currentYear := time.Now().Year()
