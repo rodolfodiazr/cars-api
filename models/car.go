@@ -31,6 +31,10 @@ var (
 	// ErrCarCategoryRequired is returned when a car is validated without a category.
 	// The category field is mandatory for both creation and update operations.
 	ErrCarCategoryRequired = errors.New("category is required")
+
+	// ErrInvalidYear is returned when a car is validated with an invalid year.
+	// The year field is mandatory for both creation and update operations.
+	ErrInvalidYear = errors.New("year is not valid")
 )
 
 // Car represents a vehicle with various attributes such as make, model, package, color, category, year, mileage, and price.
@@ -85,7 +89,7 @@ func (c Car) validate() error {
 
 	currentYear := time.Now().Year()
 	if c.Year <= 0 || c.Year > currentYear {
-		return errors.New("year is not valid")
+		return ErrInvalidYear
 	}
 
 	if c.Mileage != nil {
