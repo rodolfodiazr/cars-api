@@ -35,6 +35,10 @@ var (
 	// ErrInvalidYear is returned when a car is validated with an invalid year.
 	// The year field is mandatory for both creation and update operations.
 	ErrInvalidYear = errors.New("year is not valid")
+
+	// ErrInvalidMileage is returned when a car is validated with an invalid mileage.
+	// The mileage cannot be negative.
+	ErrInvalidMileage = errors.New("mileage cannot be negative")
 )
 
 // Car represents a vehicle with various attributes such as make, model, package, color, category, year, mileage, and price.
@@ -94,7 +98,7 @@ func (c Car) validate() error {
 
 	if c.Mileage != nil {
 		if *c.Mileage < 0 {
-			return errors.New("mileage cannot be negative")
+			return ErrInvalidMileage
 		}
 	}
 
