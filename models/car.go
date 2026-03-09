@@ -39,6 +39,10 @@ var (
 	// ErrInvalidMileage is returned when a car is validated with an invalid mileage.
 	// The mileage cannot be negative.
 	ErrInvalidMileage = errors.New("mileage cannot be negative")
+
+	// ErrInvalidPrice is returned when a car is validated with an invalid price.
+	// The price cannot be negative.
+	ErrInvalidPrice = errors.New("price cannot be negative")
 )
 
 // Car represents a vehicle with various attributes such as make, model, package, color, category, year, mileage, and price.
@@ -104,7 +108,7 @@ func (c Car) validate() error {
 
 	if c.Price != nil {
 		if *c.Price < 0 {
-			return errors.New("price cannot be negative")
+			return ErrInvalidPrice
 		}
 	}
 	return nil
