@@ -79,7 +79,7 @@ func Test_Car_Validate(t *testing.T) {
 				Color:    "Silver",
 				Year:     currentYear + 10,
 			},
-			expectedError: errors.New("year is not valid"),
+			expectedError: ErrInvalidYear,
 		},
 		{
 			name: "All necessary properties are defined",
