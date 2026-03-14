@@ -17,7 +17,7 @@ func JSON(w http.ResponseWriter, status int, payload any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
-	if status < http.StatusOK || status == http.StatusNoContent || status == http.StatusNotModified {
+	if status == http.StatusNoContent || status == http.StatusNotModified {
 		return nil
 	}
 
