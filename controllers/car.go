@@ -203,8 +203,8 @@ func (c *CarController) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("car deleted id=%s", id)
 	w.WriteHeader(http.StatusNoContent)
+	log.Printf("car deleted id=%s", id)
 }
 
 func getIDParam(r *http.Request) (string, error) {
