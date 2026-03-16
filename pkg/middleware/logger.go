@@ -13,6 +13,7 @@ import (
 type responseWriter struct {
 	http.ResponseWriter
 	statusCode int
+	bytes      int
 }
 
 func (rw *responseWriter) WriteHeader(code int) {
@@ -26,7 +27,9 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 	if rw.statusCode == 0 {
 		rw.statusCode = http.StatusOK
 	}
-	return rw.ResponseWriter.Write(b)
+	n, err := rw.ResponseWriter.Write(b)
+	rw.bytes += n
+	return n, err
 }
 
 func Logging(next http.Handler) http.Handler {
