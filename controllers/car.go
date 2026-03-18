@@ -229,6 +229,5 @@ func parseCarFilters(q url.Values) (models.CarFilters, error) {
 		}
 		f.Year = year
 	}
-
 	return f, nil
 }
