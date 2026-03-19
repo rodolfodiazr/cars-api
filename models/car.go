@@ -71,7 +71,7 @@ func (c Car) ValidateForCreate() error {
 }
 
 func (c Car) ValidateForUpdate() error {
-	if strings.TrimSpace(c.ID) == "" {
+	if isBlank(c.ID) {
 		return ErrCarIDRequiredForUpdate
 	}
 	return c.validate()
@@ -79,19 +79,19 @@ func (c Car) ValidateForUpdate() error {
 
 // Validate checks that all required fields in the Car struct are present and valid.
 func (c Car) validate() error {
-	if strings.TrimSpace(c.Make) == "" {
+	if isBlank(c.Make) {
 		return ErrCarMakeRequired
 	}
 
-	if strings.TrimSpace(c.Model) == "" {
+	if isBlank(c.Model) {
 		return ErrCarModelRequired
 	}
 
-	if strings.TrimSpace(c.Color) == "" {
+	if isBlank(c.Color) {
 		return ErrCarColorRequired
 	}
 
-	if strings.TrimSpace(c.Category) == "" {
+	if isBlank(c.Category) {
 		return ErrCarCategoryRequired
 	}
 
@@ -112,4 +112,8 @@ func (c Car) validate() error {
 		}
 	}
 	return nil
+}
+
+func isBlank(s string) bool {
+	return strings.TrimSpace(s) == ""
 }
