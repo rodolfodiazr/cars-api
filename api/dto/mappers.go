@@ -46,9 +46,9 @@ func ToResponse(car *models.Car) CarResponse {
 }
 
 func ToResponseList(cars models.Cars) []CarResponse {
-	out := make([]CarResponse, 0, len(cars))
+	out := make([]CarResponse, len(cars))
 	for i := range cars {
-		out = append(out, ToResponse(&cars[i]))
+		out[i] = ToResponse(&cars[i])
 	}
 	return out
 }
