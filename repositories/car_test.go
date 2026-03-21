@@ -59,7 +59,7 @@ func TestDefaultCarRepository_List(t *testing.T) {
 		},
 		{
 			name:     "Filter by year",
-			filters:  models.CarFilters{Year: 2010},
+			filters:  models.CarFilters{Year: u.Ptr(2010)},
 			expected: []string{"1"},
 		},
 		{
@@ -74,7 +74,7 @@ func TestDefaultCarRepository_List(t *testing.T) {
 			name: "Filter by make and year",
 			filters: models.CarFilters{
 				Make: "Toyota",
-				Year: 2019,
+				Year: u.Ptr(2019),
 			},
 			expected: []string{"2"},
 		},
@@ -82,7 +82,7 @@ func TestDefaultCarRepository_List(t *testing.T) {
 			name: "Filter by model and year",
 			filters: models.CarFilters{
 				Model: "Rav4",
-				Year:  2018,
+				Year:  u.Ptr(2018),
 			},
 			expected: []string{"3"},
 		},
@@ -91,7 +91,7 @@ func TestDefaultCarRepository_List(t *testing.T) {
 			filters: models.CarFilters{
 				Make:  "Ford",
 				Model: "Bronco",
-				Year:  2022,
+				Year:  u.Ptr(2022),
 			},
 			expected: []string{"4"},
 		},

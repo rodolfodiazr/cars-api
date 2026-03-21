@@ -61,7 +61,7 @@ func (r *DefaultCarRepository) List(f models.CarFilters) (models.Cars, error) {
 		if f.Model != "" && !strings.EqualFold(car.Model, f.Model) {
 			continue
 		}
-		if f.Year != 0 && car.Year != f.Year {
+		if f.Year != nil && *f.Year != car.Year {
 			continue
 		}
 		list = append(list, car)

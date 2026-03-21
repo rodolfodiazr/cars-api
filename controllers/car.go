@@ -227,7 +227,7 @@ func parseCarFilters(q url.Values) (models.CarFilters, error) {
 		if err != nil {
 			return f, e.NewValidationError(fmt.Errorf("invalid year: %q", yearStr))
 		}
-		f.Year = year
+		f.Year = &year
 	}
 	return f, nil
 }
