@@ -228,9 +228,14 @@ func parseCarFilters(q url.Values) (models.CarFilters, error) {
 		return f, err
 	}
 
-	if yearStr := q.Get("year"); yearStr != "" {
-		year, err := strconv.Atoi(yearStr)
-		if err != nil {
+	yearStr, err := getQueryParam(q, "year")
+	if err != nil {
+		return f, err
+	}
+
+	if yearStr != "" {
+		year, errParser := strconv.Atoi(yearStr)
+		if errParser != nil {
 			return f, e.NewValidationError(fmt.Errorf("invalid year: %q", yearStr))
 		}
 		f.Year = &year
@@ -249,4 +254,18 @@ func getQueryParam(q url.Values, key string) (string, error) {
 	}
 
 	return strings.TrimSpace(values[0]), nil
+}
+
+func parseIntParam(q url.Values, key string) (int, error) {
+	valStr, err := getQueryParam(q, key)
+	if err != nil || valStr == "" {
+		return 0, err
+	}
+
+	v, err := strconv.Atoi(valStr)
+	if err != nil {
+		return 0, e.NewValidationError(fmt.Errorf("invalid %s: %q", key, valStr))
+	}
+
+	return v, nil
 }
