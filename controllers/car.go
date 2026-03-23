@@ -217,9 +217,15 @@ func getIDParam(r *http.Request) (string, error) {
 
 // parseCarFilters converts URL query parameters into a CarFilters struct.
 func parseCarFilters(q url.Values) (models.CarFilters, error) {
-	f := models.CarFilters{
-		Make:  q.Get("make"),
-		Model: q.Get("model"),
+	var f models.CarFilters
+	var err error
+
+	if f.Make, err = getQueryParam(q, "make"); err != nil {
+		return f, err
+	}
+
+	if f.Make, err = getQueryParam(q, "model"); err != nil {
+		return f, err
 	}
 
 	if yearStr := q.Get("year"); yearStr != "" {
@@ -230,4 +236,17 @@ func parseCarFilters(q url.Values) (models.CarFilters, error) {
 		f.Year = &year
 	}
 	return f, nil
+}
+
+func getQueryParam(q url.Values, key string) (string, error) {
+	values, ok := q[key]
+	if !ok || len(values) == 0 {
+		return "", nil
+	}
+
+	if len(values) > 1 {
+		return "", e.NewValidationError(fmt.Errorf("multiple values for %q", key))
+	}
+
+	return strings.TrimSpace(values[0]), nil
 }
