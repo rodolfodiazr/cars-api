@@ -256,17 +256,3 @@ func getQueryParam(q url.Values, key string) (string, error) {
 
 	return strings.TrimSpace(values[0]), nil
 }
-
-func parseIntParam(q url.Values, key string) (int, error) {
-	valStr, err := getQueryParam(q, key)
-	if err != nil || valStr == "" {
-		return 0, err
-	}
-
-	v, err := strconv.Atoi(valStr)
-	if err != nil {
-		return 0, e.NewValidationError(fmt.Errorf("invalid %s: %q", key, valStr))
-	}
-
-	return v, nil
-}
