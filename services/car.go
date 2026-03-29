@@ -51,6 +51,7 @@ func (s *DefaultCarService) List(f models.CarFilters) (models.Cars, error) {
 }
 
 // Create adds a new car to the repository.
+// The car must contain all required fields.
 func (s *DefaultCarService) Create(car *models.Car) error {
 	if err := car.ValidateForCreate(); err != nil {
 		return e.NewValidationError(err)
