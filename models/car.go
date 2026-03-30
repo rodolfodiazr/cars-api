@@ -114,6 +114,7 @@ func (c Car) validate() error {
 	return nil
 }
 
+// isBlank reports whether s is empty or contains only whitespace.
 func isBlank(s string) bool {
 	return strings.TrimSpace(s) == ""
 }
