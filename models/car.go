@@ -74,6 +74,10 @@ func (c Car) ValidateForCreate() error {
 	return c.validate()
 }
 
+// ValidateForUpdate validates the car for an update operation.
+//
+// The ID must be present to identify the existing resource being updated.
+// It also verifies that all required fields are present and valid.
 func (c Car) ValidateForUpdate() error {
 	if isBlank(c.ID) {
 		return ErrCarIDRequiredForUpdate
