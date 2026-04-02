@@ -70,7 +70,7 @@ func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 	// Supported query params:
 	// - make
 	// - model
-	// - year (0 or omitted means no year filter)
+	// - year
 	filters, err := parseCarFilters(r.URL.Query())
 	if err != nil {
 		log.Printf("error parsing car filters: %v", err)
