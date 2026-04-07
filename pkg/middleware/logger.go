@@ -32,6 +32,8 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 	return n, err
 }
 
+// Logging is an HTTP middleware that enriches each request with a unique
+// request ID and a request-scoped logger stored in the context.
 func Logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
