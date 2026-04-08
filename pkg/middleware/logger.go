@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// responseWriter wraps http.ResponseWriter to capture the response
+// status code and the total number of bytes written.
 type responseWriter struct {
 	http.ResponseWriter
 	statusCode int
