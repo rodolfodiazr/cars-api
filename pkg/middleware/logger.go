@@ -18,6 +18,8 @@ type responseWriter struct {
 	bytes      int
 }
 
+// WriteHeader records the response status code before delegating
+// to the underlying ResponseWriter.
 func (rw *responseWriter) WriteHeader(code int) {
 	if rw.statusCode == 0 {
 		rw.statusCode = code
