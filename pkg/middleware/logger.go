@@ -27,6 +27,10 @@ func (rw *responseWriter) WriteHeader(code int) {
 	rw.ResponseWriter.WriteHeader(code)
 }
 
+// Write writes the response body, ensuring a default 200 OK status
+// is recorded if WriteHeader was not called explicitly.
+//
+// It also tracks the total number of bytes written.
 func (rw *responseWriter) Write(b []byte) (int, error) {
 	if rw.statusCode == 0 {
 		rw.statusCode = http.StatusOK
