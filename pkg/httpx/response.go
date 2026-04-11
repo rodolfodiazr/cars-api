@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+// ErrorResponse represents the standard JSON structure returned
+// when an API request fails.
 type ErrorResponse struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
