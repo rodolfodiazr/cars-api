@@ -15,6 +15,12 @@ type ErrorResponse struct {
 	Details string `json:"details,omitempty"`
 }
 
+// JSON writes a JSON response with the provided HTTP status code.
+//
+// It automatically sets the Content-Type header to application/json.
+//
+// For responses that must not include a body, such as 204 No Content
+// and 304 Not Modified, the payload is ignored.
 func JSON(w http.ResponseWriter, status int, payload any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
