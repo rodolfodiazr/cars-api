@@ -32,6 +32,7 @@ func JSON(w http.ResponseWriter, status int, payload any) error {
 	return json.NewEncoder(w).Encode(payload)
 }
 
+// writeError writes a ServiceError as a standardized JSON error response.
 func writeError(w http.ResponseWriter, err *e.ServiceError) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(err.StatusCode)
