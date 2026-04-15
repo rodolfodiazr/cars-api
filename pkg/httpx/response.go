@@ -44,6 +44,10 @@ func writeError(w http.ResponseWriter, err *e.ServiceError) {
 	})
 }
 
+// HandleServiceError converts an error into a standardized HTTP JSON response.
+//
+// If err is already a ServiceError, it is written as-is.
+// Otherwise, it is wrapped as an internal server error before responding.
 func HandleServiceError(w http.ResponseWriter, err error) {
 	if err == nil {
 		return
