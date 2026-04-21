@@ -16,6 +16,8 @@ func NewInternalError(err error) *ServiceError {
 	return wrap(CodeInternalError, http.StatusInternalServerError, MsgInternalError, err)
 }
 
+// NewInvalidRequestBodyError returns a ServiceError indicating that the request
+// body is malformed or cannot be parsed.
 func NewInvalidRequestBodyError(err error) *ServiceError {
 	return wrap(CodeInvalidRequestBody, http.StatusBadRequest, MsgInvalidRequestBody, err)
 }
