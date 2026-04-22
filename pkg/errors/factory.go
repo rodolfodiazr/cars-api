@@ -22,6 +22,9 @@ func NewInvalidRequestBodyError(err error) *ServiceError {
 	return wrap(CodeInvalidRequestBody, http.StatusBadRequest, MsgInvalidRequestBody, err)
 }
 
+// NewValidationError returns a ServiceError indicating that request validation failed.
+//
+// It should be used when input data does not meet required constraints.
 func NewValidationError(err error) *ServiceError {
 	return wrap(CodeValidationFailed, http.StatusBadRequest, MsgValidationFailed, err)
 }
