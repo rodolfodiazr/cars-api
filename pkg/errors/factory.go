@@ -2,6 +2,9 @@ package errors
 
 import "net/http"
 
+// wrap constructs a ServiceError with the provided metadata and underlying error.
+//
+// It is an internal helper used to standardize error creation across the package.
 func wrap(code string, status int, message string, err error) *ServiceError {
 	return &ServiceError{
 		Code:       code,
