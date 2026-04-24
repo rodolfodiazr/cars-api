@@ -14,7 +14,9 @@ func wrap(code string, status int, message string, err error) *ServiceError {
 	}
 }
 
-// General Errors
+// NewInternalError returns a ServiceError representing an unexpected internal failure.
+//
+// It should be used when an error cannot be classified or safely exposed to the client.
 func NewInternalError(err error) *ServiceError {
 	return wrap(CodeInternalError, http.StatusInternalServerError, MsgInternalError, err)
 }
