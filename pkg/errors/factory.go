@@ -34,7 +34,8 @@ func NewValidationError(err error) *ServiceError {
 	return wrap(CodeValidationFailed, http.StatusBadRequest, MsgValidationFailed, err)
 }
 
-// Car-Specific Errors
+// NewCarNotFoundError returns a ServiceError indicating that a car resource
+// could not be found.
 func NewCarNotFoundError(err error) *ServiceError {
 	return wrap(CodeCarNotFound, http.StatusNotFound, MsgCarNotFound, err)
 }
