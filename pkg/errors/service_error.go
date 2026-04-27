@@ -1,5 +1,11 @@
 package errors
 
+// ServiceError represents an application-level error with structured
+// metadata suitable for HTTP responses.
+//
+// It contains a machine-readable Code, a human-readable Message,
+// the associated HTTP StatusCode, and an optional underlying error (Err)
+// for internal debugging purposes.
 type ServiceError struct {
 	Code       string
 	Message    string
