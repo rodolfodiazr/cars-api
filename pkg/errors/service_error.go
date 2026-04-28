@@ -13,6 +13,9 @@ type ServiceError struct {
 	Err        error
 }
 
+// Error implements the error interface.
+//
+// It returns the human-readable message intended for clients.
 func (e *ServiceError) Error() string {
 	return e.Message
 }
