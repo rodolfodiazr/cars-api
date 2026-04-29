@@ -20,6 +20,10 @@ func (e *ServiceError) Error() string {
 	return e.Message
 }
 
+// Details returns the underlying error message, if present.
+//
+// This is typically used for debugging or logging purposes and may be
+// omitted from responses when no internal error is available.
 func (e *ServiceError) Details() string {
 	if e.Err != nil {
 		return e.Err.Error()
