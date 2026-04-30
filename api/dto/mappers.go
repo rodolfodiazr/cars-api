@@ -4,6 +4,10 @@ import (
 	"cars/models"
 )
 
+// ToModelCreate maps a CreateCarRequest to a Car model.
+//
+// It is intended for create operations, where the ID is generated
+// by the system and must not be set in the request.
 func ToModelCreate(req CreateCarRequest) *models.Car {
 	return toModel(req)
 }
