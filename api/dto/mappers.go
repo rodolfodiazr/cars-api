@@ -12,6 +12,11 @@ func ToModelCreate(req CreateCarRequest) *models.Car {
 	return toModel(req)
 }
 
+// ToModelUpdate maps an UpdateCarRequest to a Car model,
+// assigning the provided ID to the resulting entity.
+//
+// It is intended for update operations, where the ID identifies
+// the existing resource being modified.
 func ToModelUpdate(id string, req UpdateCarRequest) *models.Car {
 	car := toModel(req)
 	car.ID = id
