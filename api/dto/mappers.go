@@ -36,6 +36,9 @@ func toModel(req CarUpsertRequest) *models.Car {
 	}
 }
 
+// ToResponse maps a Car model to a CarResponse.
+//
+// If the provided car is nil, it returns an empty response.
 func ToResponse(car *models.Car) CarResponse {
 	if car == nil {
 		return CarResponse{}
