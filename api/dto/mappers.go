@@ -57,6 +57,7 @@ func ToResponse(car *models.Car) CarResponse {
 	}
 }
 
+// ToResponseList maps a collection of Car models to a slice of CarResponse.
 func ToResponseList(cars models.Cars) []CarResponse {
 	out := make([]CarResponse, len(cars))
 	for i := range cars {
