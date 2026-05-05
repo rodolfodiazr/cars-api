@@ -23,6 +23,9 @@ func ToModelUpdate(id string, req UpdateCarRequest) *models.Car {
 	return car
 }
 
+// toModel maps a CarUpsertRequest to a Car model.
+//
+// It is an internal helper shared by create and update mappings.
 func toModel(req CarUpsertRequest) *models.Car {
 	return &models.Car{
 		Make:     req.Make,
