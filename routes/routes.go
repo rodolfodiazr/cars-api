@@ -11,6 +11,28 @@ import (
 	chimw "github.com/go-chi/chi/v5/middleware"
 )
 
+// Register initializes and configures the application's HTTP routes.
+//
+// It sets up the dependency chain (repository → service → controller),
+// applies global middlewares, and registers all endpoints under the "/cars" path.
+//
+// Routes:
+//
+//	GET    /cars          - List all cars (supports optional filtering via query params)
+//	POST   /cars          - Create a new car
+//	GET    /cars/{id}     - Retrieve a car by ID
+//	PUT    /cars/{id}     - Replace an existing car (full update)
+//	DELETE /cars/{id}     - Delete a car by ID
+//
+// Middleware applied:
+//
+//   - CleanPath: normalizes URL paths
+//   - Recoverer: recovers from panics and returns HTTP 500
+//   - Logging: custom request logging middleware
+//
+// Returns:
+//
+//	A configured *chi.Mux router ready to be used by an HTTP server.
 func Register() *chi.Mux {
 	repo := repositories.NewCarRepository(data.Cars())
 	service := services.NewCarService(repo)
