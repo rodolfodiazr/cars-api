@@ -6,6 +6,50 @@ import (
 	"testing"
 )
 
+func TestDefaultCarRepository_Find(t *testing.T) {
+	t.Run("should return car when it exists", func(t *testing.T) {
+		// Arrange
+		expected := models.Car{
+			ID:    "1",
+			Make:  "Toyota",
+			Model: "Corolla",
+		}
+
+		repo := &DefaultCarRepository{
+			cars: map[string]models.Car{
+				expected.ID: expected,
+			},
+		}
+
+		// Act
+		got, err := repo.Find(expected.ID)
+
+		// Assert
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if expected != got {
+			t.Errorf("expected %v car, got %v", expected, got)
+		}
+	})
+
+	t.Run("should return error when car does not exist", func(t *testing.T) {
+		// Arrange
+		repo := &DefaultCarRepository{
+			cars: map[string]models.Car{},
+		}
+
+		// Act
+		_, err := repo.Find("missing-id")
+
+		// Assert
+		if err == nil {
+			t.Fatalf("expected error, got nil")
+		}
+	})
+}
+
 func TestDefaultCarRepository_List(t *testing.T) {
 	// Initial seed data
 	cars := map[string]models.Car{
@@ -131,7 +175,7 @@ func TestDefaultCarRepository_List(t *testing.T) {
 					}
 				}
 				if !found {
-					t.Errorf("Expected car ID %s not found in result", id)
+					t.Errorf("expected car ID %s not found in result", id)
 				}
 			}
 		})
