@@ -181,3 +181,37 @@ func TestDefaultCarRepository_List(t *testing.T) {
 		})
 	}
 }
+
+func TestDefaultCarRepository_Create(t *testing.T) {
+	// Arrange
+	repo := &DefaultCarRepository{
+		cars: map[string]models.Car{},
+	}
+
+	car := &models.Car{
+		Make:  "Honda",
+		Model: "Civic",
+	}
+
+	// Act
+	err := repo.Create(car)
+
+	// Assert
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if car.ID == "" {
+		t.Fatal("expected generated car ID")
+	}
+
+	stored, exists := repo.cars[car.ID]
+
+	if !exists {
+		t.Fatal("expected car to be stored in repository")
+	}
+
+	if stored != *car {
+		t.Fatalf("expected stored car %+v, got %+v", *car, stored)
+	}
+}
