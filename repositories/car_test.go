@@ -2,7 +2,9 @@ package repositories
 
 import (
 	"cars/models"
+	e "cars/pkg/errors"
 	u "cars/pkg/utils"
+	"errors"
 	"testing"
 )
 
@@ -214,4 +216,70 @@ func TestDefaultCarRepository_Create(t *testing.T) {
 	if stored != *car {
 		t.Fatalf("expected stored car %+v, got %+v", *car, stored)
 	}
+}
+
+func TestDefaultCarRepository_Update(t *testing.T) {
+	t.Run("should update existing car", func(t *testing.T) {
+		// Arrange
+		existing := models.Car{
+			ID:    "1",
+			Make:  "Toyota",
+			Model: "Corolla",
+		}
+
+		repo := &DefaultCarRepository{
+			cars: map[string]models.Car{
+				existing.ID: existing,
+			},
+		}
+
+		updated := &models.Car{
+			ID:    "1",
+			Make:  "Honda",
+			Model: "Civic",
+		}
+
+		// Act
+		err := repo.Update(updated)
+
+		// Assert
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		stored, exists := repo.cars[updated.ID]
+
+		if !exists {
+			t.Fatal("expected updated car to exist in repository")
+		}
+
+		if stored != *updated {
+			t.Fatalf("expected stored car %+v, got %+v", *updated, stored)
+		}
+	})
+
+	t.Run("should return error when car does not exist", func(t *testing.T) {
+		// Arrange
+		repo := &DefaultCarRepository{
+			cars: map[string]models.Car{},
+		}
+
+		car := &models.Car{
+			ID:    "missing-id",
+			Make:  "Mazda",
+			Model: "3",
+		}
+
+		// Act
+		err := repo.Update(car)
+
+		// Assert
+		if err == nil {
+			t.Fatal("expected error but got nil")
+		}
+
+		if !errors.Is(err, e.ErrCarNotFound) {
+			t.Fatalf("expected ErrCarNotFound, got %v", err)
+		}
+	})
 }
