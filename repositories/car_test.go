@@ -283,3 +283,55 @@ func TestDefaultCarRepository_Update(t *testing.T) {
 		}
 	})
 }
+
+func TestDefaultCarRepository_Delete(t *testing.T) {
+	t.Run("should delete existing car", func(t *testing.T) {
+		// Arrange
+		car := models.Car{
+			ID:    "1",
+			Make:  "Toyota",
+			Model: "Corolla",
+		}
+
+		repo := &DefaultCarRepository{
+			cars: map[string]models.Car{
+				car.ID: car,
+			},
+		}
+
+		// Act
+		err := repo.Delete(car.ID)
+
+		// Assert
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if _, exists := repo.cars[car.ID]; exists {
+			t.Fatal("expected car to be deleted from repository")
+		}
+
+		if len(repo.cars) != 0 {
+			t.Fatalf("expected repository to be empty, got %d items", len(repo.cars))
+		}
+	})
+
+	t.Run("should return error when car does not exist", func(t *testing.T) {
+		// Arrange
+		repo := &DefaultCarRepository{
+			cars: map[string]models.Car{},
+		}
+
+		// Act
+		err := repo.Delete("missing-id")
+
+		// Assert
+		if err == nil {
+			t.Fatal("expected error but got nil")
+		}
+
+		if !errors.Is(err, e.ErrCarNotFound) {
+			t.Fatalf("expected ErrCarNotFound, got %v", err)
+		}
+	})
+}
