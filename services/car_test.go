@@ -2,6 +2,9 @@ package services
 
 import (
 	"cars/models"
+	e "cars/pkg/errors"
+	"errors"
+	"testing"
 )
 
 type FindFunc func(id string) (models.Car, error)
@@ -36,4 +39,84 @@ func (m *MockCarRepository) Update(car *models.Car) error {
 
 func (m *MockCarRepository) Delete(id string) error {
 	return m.DeleteFn(id)
+}
+
+func TestDefaultCarService_Find(t *testing.T) {
+	t.Run("should return car when repository finds it", func(t *testing.T) {
+		// Arrange
+		expected := models.Car{
+			ID:       "1",
+			Make:     "Toyota",
+			Model:    "Corolla",
+			Color:    "Black",
+			Category: "Sedan",
+			Year:     2026,
+		}
+
+		repo := &MockCarRepository{
+			FindFn: func(id string) (models.Car, error) {
+				return expected, nil
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		got, err := service.Find(expected.ID)
+
+		// Assert
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if got != expected {
+			t.Fatalf("expected %+v, got %+v", expected, got)
+		}
+	})
+
+	t.Run("should return car not found error when repository returns ErrCarNotFound", func(t *testing.T) {
+		// Arrange
+		repo := &MockCarRepository{
+			FindFn: func(id string) (models.Car, error) {
+				return models.Car{}, e.ErrCarNotFound
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		_, err := service.Find("missing-id")
+
+		// Assert
+		if err == nil {
+			t.Fatal("expected error but got nil")
+		}
+	})
+
+	t.Run("should return internal error for unexpected repository errors", func(t *testing.T) {
+		// Arrange
+		expectedErr := errors.New("database unavailable")
+
+		repo := &MockCarRepository{
+			FindFn: func(id string) (models.Car, error) {
+				return models.Car{}, expectedErr
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		_, err := service.Find("1")
+
+		// Assert
+		if err == nil {
+			t.Fatal("expected error but got nil")
+		}
+	})
 }
