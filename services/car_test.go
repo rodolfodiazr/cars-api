@@ -4,6 +4,7 @@ import (
 	"cars/models"
 	e "cars/pkg/errors"
 	"errors"
+	"reflect"
 	"testing"
 )
 
@@ -113,6 +114,77 @@ func TestDefaultCarService_Find(t *testing.T) {
 
 		// Act
 		_, err := service.Find("1")
+
+		// Assert
+		if err == nil {
+			t.Fatal("expected error but got nil")
+		}
+	})
+}
+
+func TestDefaultCarService_List(t *testing.T) {
+	t.Run("should return cars when repository succeeds", func(t *testing.T) {
+		// Arrange
+		expected := models.Cars{
+			{
+				ID:    "1",
+				Make:  "Toyota",
+				Model: "Corolla",
+			},
+			{
+				ID:    "2",
+				Make:  "Honda",
+				Model: "Civic",
+			},
+		}
+
+		filters := models.CarFilters{
+			Make: "Toyota",
+		}
+
+		repo := &MockCarRepository{
+			ListFn: func(f models.CarFilters) (models.Cars, error) {
+				if f != filters {
+					t.Fatalf("expected filters %+v, got %+v", filters, f)
+				}
+
+				return expected, nil
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		got, err := service.List(filters)
+
+		// Assert
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if !reflect.DeepEqual(got, expected) {
+			t.Fatalf("expected %+v, got %+v", expected, got)
+		}
+	})
+
+	t.Run("should return internal error when repository fails", func(t *testing.T) {
+		// Arrange
+		expectedErr := errors.New("database unavailable")
+
+		repo := &MockCarRepository{
+			ListFn: func(f models.CarFilters) (models.Cars, error) {
+				return models.Cars{}, expectedErr
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		_, err := service.List(models.CarFilters{})
 
 		// Assert
 		if err == nil {
