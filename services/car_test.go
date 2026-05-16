@@ -192,3 +192,61 @@ func TestDefaultCarService_List(t *testing.T) {
 		}
 	})
 }
+
+func TestDefaultCarService_Create(t *testing.T) {
+	t.Run("should create car when validation succeeds", func(t *testing.T) {
+		// Arrange
+		car := &models.Car{
+			Make:     "Toyota",
+			Model:    "Corolla",
+			Color:    "Gray",
+			Category: "Sedan",
+			Year:     2026,
+		}
+
+		repo := &MockCarRepository{
+			CreateFn: func(c *models.Car) error {
+				if c != car {
+					t.Fatal("expected same car pointer to be passed to repository")
+				}
+				return nil
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		err := service.Create(car)
+
+		// Assert
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("should return validation error when car is invalid", func(t *testing.T) {
+		// Arrange
+		car := &models.Car{}
+
+		repo := &MockCarRepository{
+			CreateFn: func(c *models.Car) error {
+				t.Fatal("repository Create should not be called")
+				return nil
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		err := service.Create(car)
+
+		// Assert
+		if err == nil {
+			t.Fatal("expected error but got nil")
+		}
+	})
+}
