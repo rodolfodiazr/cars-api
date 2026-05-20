@@ -250,3 +250,118 @@ func TestDefaultCarService_Create(t *testing.T) {
 		}
 	})
 }
+
+func TestDefaultCarService_Update(t *testing.T) {
+	t.Run("should update car when validation succeeds", func(t *testing.T) {
+		// Arrange
+		car := &models.Car{
+			ID:       "1",
+			Make:     "Toyota",
+			Model:    "Corolla",
+			Color:    "Gray",
+			Category: "Sedan",
+			Year:     2026,
+		}
+
+		repo := &MockCarRepository{
+			UpdateFn: func(c *models.Car) error {
+				if c != car {
+					t.Fatal("expected same car pointer to be passed to repository")
+				}
+				return nil
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		err := service.Update(car)
+
+		// Assert
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("should return validation error when car is invalid", func(t *testing.T) {
+		// Arrange
+		car := &models.Car{}
+
+		repo := &MockCarRepository{
+			UpdateFn: func(c *models.Car) error {
+				t.Fatal("repository Update should not be called")
+				return nil
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		err := service.Update(car)
+
+		// Assert
+		if err == nil {
+			t.Fatal("expected error but got nil")
+		}
+	})
+
+	t.Run("should return car not found error when repository returns ErrCarNotFound", func(t *testing.T) {
+		// Arrange
+		car := &models.Car{
+			ID:    "missing-id",
+			Make:  "Honda",
+			Model: "Civic",
+		}
+
+		repo := &MockCarRepository{
+			UpdateFn: func(c *models.Car) error {
+				return e.ErrCarNotFound
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		err := service.Update(car)
+
+		// Assert
+		if err == nil {
+			t.Fatal("expected error but got nil")
+		}
+	})
+
+	t.Run("should return internal error when repository fails unexpectedly", func(t *testing.T) {
+		// Arrange
+		car := &models.Car{
+			ID:    "1",
+			Make:  "Mazda",
+			Model: "3",
+		}
+
+		expectedErr := errors.New("database unavailable")
+
+		repo := &MockCarRepository{
+			UpdateFn: func(c *models.Car) error {
+				return expectedErr
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		err := service.Update(car)
+
+		// Assert
+		if err == nil {
+			t.Fatal("expected error but got nil")
+		}
+	})
+}
