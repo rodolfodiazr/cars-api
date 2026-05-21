@@ -365,3 +365,75 @@ func TestDefaultCarService_Update(t *testing.T) {
 		}
 	})
 }
+
+func TestDefaultCarService_Delete(t *testing.T) {
+	t.Run("should delete car when repository succeeds", func(t *testing.T) {
+		// Arrange
+		expectedID := "1"
+
+		repo := &MockCarRepository{
+			DeleteFn: func(id string) error {
+				if id != expectedID {
+					t.Fatalf("expected id %q, got %q", expectedID, id)
+				}
+				return nil
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		err := service.Delete(expectedID)
+
+		// Assert
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("should return car not found error when repository returns ErrCarNotFound", func(t *testing.T) {
+		// Arrange
+		repo := &MockCarRepository{
+			DeleteFn: func(id string) error {
+				return e.ErrCarNotFound
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		err := service.Delete("missing-id")
+
+		// Assert
+		if err == nil {
+			t.Fatal("expected error but got nil")
+		}
+	})
+
+	t.Run("should return internal error when repository fails unexpectedly", func(t *testing.T) {
+		// Arrange
+		expectedErr := errors.New("database unavailable")
+
+		repo := &MockCarRepository{
+			DeleteFn: func(id string) error {
+				return expectedErr
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		err := service.Delete("1")
+
+		// Assert
+		if err == nil {
+			t.Fatal("expected error but got nil")
+		}
+	})
+}
