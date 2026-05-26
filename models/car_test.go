@@ -249,7 +249,7 @@ func Test_ValidateForUpdate(t *testing.T) {
 	}
 }
 
-func Test_Car_Validate(t *testing.T) {
+func Test_Car_validate(t *testing.T) {
 	currentYear := time.Now().Year()
 
 	tCases := []struct {
