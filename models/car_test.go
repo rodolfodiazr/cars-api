@@ -280,17 +280,6 @@ func Test_Car_validate(t *testing.T) {
 			expectedError: errors.New("model is required"),
 		},
 		{
-			name: "category is not defined",
-			car: Car{
-				ID:    "C003",
-				Make:  "Kia",
-				Model: "Rio",
-				Color: "White",
-				Year:  2025,
-			},
-			expectedError: errors.New("category is required"),
-		},
-		{
 			name: "color is not defined",
 			car: Car{
 				ID:       "C004",
@@ -300,6 +289,17 @@ func Test_Car_validate(t *testing.T) {
 				Year:     2025,
 			},
 			expectedError: errors.New("color is required"),
+		},
+		{
+			name: "category is not defined",
+			car: Car{
+				ID:    "C003",
+				Make:  "Kia",
+				Model: "Rio",
+				Color: "White",
+				Year:  2025,
+			},
+			expectedError: errors.New("category is required"),
 		},
 		{
 			name: "year is not defined",
