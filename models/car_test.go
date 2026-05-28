@@ -313,7 +313,7 @@ func Test_Car_validate(t *testing.T) {
 			expectedError: errors.New("year is not valid"),
 		},
 		{
-			name: "year is not defined",
+			name: "year is defined, but not valid",
 			car: Car{
 				ID:       "C006",
 				Make:     "Toyota",
@@ -321,6 +321,22 @@ func Test_Car_validate(t *testing.T) {
 				Category: "Sedan",
 				Color:    "Silver",
 				Year:     currentYear + 10,
+			},
+			expectedError: ErrInvalidYear,
+		},
+		{
+			name: "mileage is not valid",
+			car: Car{
+				ID:       "C006",
+				Make:     "Toyota",
+				Model:    "Corolla",
+				Category: "Sedan",
+				Color:    "Silver",
+				Year:     currentYear + 10,
+				Mileage: func() *int64 {
+					var mi int64 = -50
+					return &mi
+				}(),
 			},
 			expectedError: ErrInvalidYear,
 		},
