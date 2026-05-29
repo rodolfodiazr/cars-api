@@ -282,7 +282,7 @@ func Test_Car_validate(t *testing.T) {
 		{
 			name: "color is not defined",
 			car: Car{
-				ID:       "C004",
+				ID:       "C003",
 				Make:     "Nissan",
 				Model:    "Versa",
 				Category: "Sedan",
@@ -293,7 +293,7 @@ func Test_Car_validate(t *testing.T) {
 		{
 			name: "category is not defined",
 			car: Car{
-				ID:    "C003",
+				ID:    "C004",
 				Make:  "Kia",
 				Model: "Rio",
 				Color: "White",
@@ -327,7 +327,7 @@ func Test_Car_validate(t *testing.T) {
 		{
 			name: "mileage is not valid",
 			car: Car{
-				ID:       "C006",
+				ID:       "C007",
 				Make:     "Toyota",
 				Model:    "Corolla",
 				Category: "Sedan",
@@ -341,9 +341,25 @@ func Test_Car_validate(t *testing.T) {
 			expectedError: ErrInvalidYear,
 		},
 		{
+			name: "price is not valid",
+			car: Car{
+				ID:       "C008",
+				Make:     "Toyota",
+				Model:    "Corolla",
+				Category: "Sedan",
+				Color:    "Silver",
+				Year:     currentYear + 10,
+				Price: func() *int64 {
+					var price int64 = -50
+					return &price
+				}(),
+			},
+			expectedError: ErrInvalidYear,
+		},
+		{
 			name: "All necessary properties are defined",
 			car: Car{
-				ID:       "C007",
+				ID:       "C009",
 				Make:     "Suzuki",
 				Model:    "Swift",
 				Category: "Sedan",
