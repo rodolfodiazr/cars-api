@@ -249,6 +249,46 @@ func TestDefaultCarService_Create(t *testing.T) {
 			t.Fatal("expected error but got nil")
 		}
 	})
+
+	t.Run("should return internal error when repository fails", func(t *testing.T) {
+		// Arrange
+		car := &models.Car{
+			Make:     "Toyota",
+			Model:    "Corolla",
+			Color:    "Gray",
+			Category: "Sedan",
+			Year:     2026,
+		}
+
+		expectedErr := errors.New("database unavailable")
+
+		repo := &MockCarRepository{
+			CreateFn: func(c *models.Car) error {
+				return expectedErr
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		err := service.Create(car)
+
+		// Assert
+		if err == nil {
+			t.Fatal("expected error but got nil")
+		}
+
+		var serviceError *e.ServiceError
+		if !errors.As(err, &serviceError) {
+			t.Fatalf("expected ServiceError, got %T", err)
+		}
+
+		if serviceError.Code != e.CodeInternalError {
+			t.Fatalf("expected INTERNAL_ERROR, got %v", serviceError.Code)
+		}
+	})
 }
 
 func TestDefaultCarService_Update(t *testing.T) {
