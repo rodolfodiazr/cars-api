@@ -352,9 +352,12 @@ func TestDefaultCarService_Update(t *testing.T) {
 	t.Run("should return car not found error when repository returns ErrCarNotFound", func(t *testing.T) {
 		// Arrange
 		car := &models.Car{
-			ID:    "missing-id",
-			Make:  "Honda",
-			Model: "Civic",
+			ID:       "1",
+			Make:     "Toyota",
+			Model:    "Corolla",
+			Color:    "Gray",
+			Category: "Sedan",
+			Year:     2026,
 		}
 
 		repo := &MockCarRepository{
@@ -373,6 +376,15 @@ func TestDefaultCarService_Update(t *testing.T) {
 		// Assert
 		if err == nil {
 			t.Fatal("expected error but got nil")
+		}
+
+		var serviceError *e.ServiceError
+		if !errors.As(err, &serviceError) {
+			t.Fatalf("expected ServiceError, got %T", err)
+		}
+
+		if serviceError.Code != e.CodeCarNotFound {
+			t.Fatalf("expected CAR_NOT_FOUND, got %v", serviceError.Code)
 		}
 	})
 
