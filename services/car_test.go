@@ -400,9 +400,12 @@ func TestDefaultCarService_Update(t *testing.T) {
 	t.Run("should return internal error when repository fails unexpectedly", func(t *testing.T) {
 		// Arrange
 		car := &models.Car{
-			ID:    "1",
-			Make:  "Mazda",
-			Model: "3",
+			ID:       "1",
+			Make:     "Toyota",
+			Model:    "Corolla",
+			Color:    "Gray",
+			Category: "Sedan",
+			Year:     2026,
 		}
 
 		expectedErr := errors.New("database unavailable")
@@ -423,6 +426,15 @@ func TestDefaultCarService_Update(t *testing.T) {
 		// Assert
 		if err == nil {
 			t.Fatal("expected error but got nil")
+		}
+
+		var serviceError *e.ServiceError
+		if !errors.As(err, &serviceError) {
+			t.Fatalf("expected ServiceError, got %T", err)
+		}
+
+		if serviceError.Code != e.CodeInternalError {
+			t.Fatalf("expected INTERNAL_ERROR, got %v", serviceError.Code)
 		}
 	})
 }
