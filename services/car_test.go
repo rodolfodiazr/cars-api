@@ -485,6 +485,15 @@ func TestDefaultCarService_Delete(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error but got nil")
 		}
+
+		var serviceError *e.ServiceError
+		if !errors.As(err, &serviceError) {
+			t.Fatalf("expected ServiceError, got %T", err)
+		}
+
+		if serviceError.Code != e.CodeCarNotFound {
+			t.Fatalf("expected CAR_NOT_FOUND, got %v", serviceError.Code)
+		}
 	})
 
 	t.Run("should return internal error when repository fails unexpectedly", func(t *testing.T) {
