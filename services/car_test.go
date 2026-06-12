@@ -119,6 +119,15 @@ func TestDefaultCarService_Find(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error but got nil")
 		}
+
+		var serviceError *e.ServiceError
+		if !errors.As(err, &serviceError) {
+			t.Fatalf("expected ServiceError, got %T", err)
+		}
+
+		if serviceError.Code != e.CodeInternalError {
+			t.Fatalf("expected INTERNAL_ERROR, got %v", serviceError.Code)
+		}
 	})
 }
 
