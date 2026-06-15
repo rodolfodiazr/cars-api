@@ -49,6 +49,10 @@ func TestDefaultCarRepository_Find(t *testing.T) {
 		if err == nil {
 			t.Fatalf("expected error, got nil")
 		}
+
+		if !errors.Is(err, e.ErrCarNotFound) {
+			t.Fatalf("expected %v, got %v", e.ErrCarNotFound, err)
+		}
 	})
 }
 
