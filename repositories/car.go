@@ -88,7 +88,6 @@ func (r *DefaultCarRepository) Create(car *models.Car) error {
 }
 
 // Update updates an existing car in the repository.
-// Returns an error if not found.
 func (r *DefaultCarRepository) Update(car *models.Car) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
