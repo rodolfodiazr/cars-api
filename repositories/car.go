@@ -36,7 +36,6 @@ func NewCarRepository(initialData map[string]models.Car) CarRepository {
 }
 
 // Find searches for a car by its ID.
-// Returns an error if not found.
 func (r *DefaultCarRepository) Find(id string) (models.Car, error) {
 	r.mu.RLock()
 	car, exists := r.cars[id]
