@@ -207,7 +207,7 @@ func (c *CarController) Delete(w http.ResponseWriter, r *http.Request) {
 	log.Printf("car deleted id=%s", id)
 }
 
-// getIDParam extracts id param from the request
+// getIDParam extracts id param from the request.
 func getIDParam(r *http.Request) (string, error) {
 	id := strings.TrimSpace(chi.URLParam(r, "id"))
 	if id == "" {
