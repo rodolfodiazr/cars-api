@@ -244,7 +244,7 @@ func parseCarFilters(q url.Values) (models.CarFilters, error) {
 	return f, nil
 }
 
-// getQueryParam returns the first value given a key
+// getQueryParam returns the first value given a key.
 func getQueryParam(q url.Values, key string) (string, error) {
 	values, ok := q[key]
 	if !ok || len(values) == 0 {
