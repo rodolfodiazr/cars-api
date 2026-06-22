@@ -30,10 +30,10 @@ func toModel(req CarUpsertRequest) *models.Car {
 	return &models.Car{
 		Make:     req.Make,
 		Model:    req.Model,
-		Package:  req.Package,
 		Color:    req.Color,
 		Category: req.Category,
 		Year:     req.Year,
+		Package:  req.Package,
 		Mileage:  req.Mileage,
 		Price:    req.Price,
 	}
