@@ -125,7 +125,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
-
+    delete:
+      summary: Delete a car by ID.
+      description: |
+        Permanently deletes a car resource identified by its ID.
+        This operation is irreversible.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the car to delete.
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Car deleted successfully. No content is returned.
+        "400":
+          description: Invalid or missing car ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Car not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     Car:
