@@ -51,10 +51,10 @@ func ToResponse(car *models.Car) CarResponse {
 		ID:       car.ID,
 		Make:     car.Make,
 		Model:    car.Model,
-		Package:  car.Package,
 		Color:    car.Color,
 		Category: car.Category,
 		Year:     car.Year,
+		Package:  car.Package,
 		Mileage:  car.Mileage,
 		Price:    car.Price,
 	}
