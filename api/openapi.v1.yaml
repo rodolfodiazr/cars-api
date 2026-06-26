@@ -160,9 +160,13 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
-    Car:
+    components:
+  schemas:
+    CarResponse:
       type: object
+      description: Represents a car returned by the API.
       required:
+        - id
         - make
         - model
         - color
@@ -171,45 +175,58 @@ components:
       properties:
         id:
           type: string
-          description: Unique identifier for the car.
+          description: Unique identifier of the car.
+          example: "5f2b3e8a"
         make:
           type: string
           description: Manufacturer of the car.
+          example: Toyota
         model:
           type: string
-          description: Model name of the car.
-        package:
-          type: string
-          description: Package level.
+          description: Model name.
+          example: Corolla
         color:
           type: string
-          description: Exterior color of the car.
+          description: Exterior color.
+          example: Black
         category:
           type: string
-          description: Category of the car (e.g., SUV, Sedan, Truck).
+          description: Vehicle category.
+          example: Sedan
         year:
           type: integer
-          description: Manufacturing year of the car.
+          format: int32
+          description: Manufacturing year.
+          example: 2024
+        package:
+          type: string
+          nullable: true
+          description: Optional package level.
+          example: XLE
         mileage:
-          type: number
-          format: double
-          description: Distance the car has traveled in miles.
+          type: integer
+          format: int64
+          nullable: true
+          description: Mileage of the car.
+          example: 18500
         price:
-          type: number
-          format: double
+          type: integer
+          format: int64
+          nullable: true
           description: Price of the car in cents.
-    Cars:
+          example: 2599000
+    CarsResponse:
       type: array
       items:
-        $ref: "#/components/schemas/Car"
+        $ref: "#/components/schemas/CarResponse"
     Response:
       type: object
       properties:
         data:
           description: The response data.
           oneOf:
-            - $ref: "#/components/schemas/Car"
-            - $ref: "#/components/schemas/Cars"
+            - $ref: "#/components/schemas/CarResponse"
+            - $ref: "#/components/schemas/CarsResponse"
         error:
           type: string
           description: Error message or empty if no error.
