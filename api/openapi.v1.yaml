@@ -160,8 +160,6 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
-    components:
-  schemas:
     CarResponse:
       type: object
       description: Represents a car returned by the API.
