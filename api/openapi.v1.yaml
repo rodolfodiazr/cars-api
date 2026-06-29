@@ -8,20 +8,20 @@ paths:
   /cars:
     get:
       summary: List all cars.
-      description: Retrieve a list of all cars.
+      description: Retrieve a list of cars.
       responses:
         '200':
           description: A list of cars.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Response"
+                $ref: "#/components/schemas/CarsResponse"
         '500':
           description: Internal Server Error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: '#/components/schemas/ErrorResponse'
     post:
       summary: Create a new car.
       description: Add a new car.
@@ -30,7 +30,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateCarRequest"
+              $ref: "#/components/schemas/CarUpsertRequest"
       responses:
         '201':
           description: Car created successfully.
@@ -66,25 +66,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Response"
+                $ref: "#/components/schemas/CarResponse"
         '400':
           description: Bad request due to invalid ID.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Car not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: '#/components/schemas/ErrorResponse'
     put:
       summary: Update a car by ID.
       description: Modify details of an existing car.
@@ -99,32 +99,32 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Response"
+              $ref: "#/components/schemas/CarUpsertRequest"
       responses:
         '200':
           description: Car updated successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Response"
+                $ref: "#/components/schemas/CarResponse"
         '400':
           description: Bad request due to invalid ID, malformed JSON, or validation error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Car not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
       summary: Delete a car by ID.
       description: |
@@ -160,8 +160,9 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
-    CreateCarRequest:
+    CarUpsertRequest:
       type: object
+      description: Request payload used to create or fully update a car.
       required:
         - make
         - model
@@ -179,11 +180,14 @@ components:
           type: string
         year:
           type: integer
+        package: 
+          type: string
+          nullable: true
         mileage:
           type: integer
           nullable: true
         price:
-          type: number
+          type: integer
           nullable: true
     CarResponse:
       type: object
@@ -242,14 +246,3 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/CarResponse"
-    Response:
-      type: object
-      properties:
-        data:
-          description: The response data.
-          oneOf:
-            - $ref: "#/components/schemas/CarResponse"
-            - $ref: "#/components/schemas/CarsResponse"
-        error:
-          type: string
-          description: Error message or empty if no error.
