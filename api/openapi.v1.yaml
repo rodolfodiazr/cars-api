@@ -134,12 +134,11 @@ paths:
         - name: id
           in: path
           required: true
-          description: Unique identifier of the car to delete.
           schema:
             type: string
       responses:
         "204":
-          description: Car deleted successfully. No content is returned.
+          description: Car deleted successfully.
         "400":
           description: Invalid or missing car ID.
           content:
