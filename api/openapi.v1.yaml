@@ -245,3 +245,10 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/CarResponse"
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
