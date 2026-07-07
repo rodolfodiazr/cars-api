@@ -3,7 +3,6 @@ info:
   title: Car API
   version: 1.0.0
   description: API for managing cars.
-
 paths:
   /cars:
     get:
