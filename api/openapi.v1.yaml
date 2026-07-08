@@ -126,9 +126,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     delete:
       summary: Delete a car by ID.
-      description: |
-        Permanently deletes a car resource identified by its ID.
-        This operation is irreversible.
+      description: Permanently deletes a car resource identified by its ID.
       parameters:
         - name: id
           in: path
