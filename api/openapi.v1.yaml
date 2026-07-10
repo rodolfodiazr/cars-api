@@ -7,7 +7,7 @@ paths:
   /cars:
     get:
       summary: List all cars.
-      description: Retrieve a list of cars.
+      description: Retrieve a list of cars, optionally filtered by make, model, or year.
       parameters:
         - name: make
           in: query
