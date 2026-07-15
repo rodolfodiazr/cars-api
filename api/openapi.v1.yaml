@@ -121,7 +121,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       summary: Update a car by ID.
-      description: Modify details of an existing car.
+      description: Fully replace an existing car resource identified by its ID.
       parameters:
         - name: id
           in: path
