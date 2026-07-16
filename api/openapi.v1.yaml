@@ -216,9 +216,11 @@ components:
           nullable: true
         mileage:
           type: integer
+          format: int64
           nullable: true
         price:
           type: integer
+          format: int64
           nullable: true
     CarResponse:
       type: object
