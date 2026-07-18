@@ -171,6 +171,7 @@ paths:
       responses:
         "204":
           description: Car deleted successfully.
+          content: {}
         "400":
           description: Invalid or missing car ID.
           content:
