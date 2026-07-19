@@ -212,6 +212,7 @@ components:
           type: string
         year:
           type: integer
+          format: int32
         package: 
           type: string
           nullable: true
