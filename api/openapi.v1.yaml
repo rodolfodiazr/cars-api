@@ -204,6 +204,8 @@ components:
       properties:
         make:
           type: string
+          description: Manufacturer of the car.
+          example: Toyota
         model:
           type: string
         color:
