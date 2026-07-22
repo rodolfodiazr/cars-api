@@ -92,8 +92,10 @@ paths:
         - name: id
           in: path
           required: true
+          description: Unique identifier of the car.
           schema:
             type: string
+            example: ABC123CD
       responses:
         '200':
           description: Car details.
