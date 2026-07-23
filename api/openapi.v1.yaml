@@ -123,7 +123,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       summary: Update a car by ID.
-      description: Fully replace an existing car resource identified by its ID.
+      description: Fully replaces an existing car identified by its ID. Partial updates are not supported.
       parameters:
         - name: id
           in: path
