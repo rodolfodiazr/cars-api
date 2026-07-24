@@ -52,7 +52,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     post:
       summary: Create a new car.
-      description: Add a new car.
+      description: Creates a new car. The server generates the car identifier and returns the created resource.
       requestBody:
         required: true
         content:
