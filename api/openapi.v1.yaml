@@ -132,8 +132,10 @@ paths:
         - name: id
           in: path
           required: true
+          description: Unique identifier of the car.
           schema:
             type: string
+            example: ABC123CD
       requestBody:
         required: true
         content:
@@ -173,8 +175,10 @@ paths:
         - name: id
           in: path
           required: true
+          description: Unique identifier of the car.
           schema:
             type: string
+            example: ABC123CD
       responses:
         "204":
           description: Car deleted successfully.
