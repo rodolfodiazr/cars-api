@@ -219,24 +219,38 @@ components:
           example: Toyota
         model:
           type: string
+          description: Model name.
+          example: Corolla
         color:
           type: string
+          description: Exterior color.
+          example: Black
         category:
           type: string
+          description: Vehicle category.
+          example: Sedan
         year:
           type: integer
           format: int32
-        package: 
+          description: Manufacturing year.
+          example: 2024
+        package:
           type: string
           nullable: true
+          description: Optional package level.
+          example: XLE
         mileage:
           type: integer
           format: int64
           nullable: true
+          description: Mileage of the car.
+          example: 18500
         price:
           type: integer
           format: int64
           nullable: true
+          description: Price of the car in cents.
+          example: 2599000
     CarResponse:
       type: object
       description: Represents a car returned by the API.
