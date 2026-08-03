@@ -313,7 +313,6 @@ components:
       required:
         - code
         - message
-        - details
       properties:
         code:
           type: string
