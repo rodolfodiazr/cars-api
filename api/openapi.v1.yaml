@@ -61,6 +61,15 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/CarUpsertRequest"
+            example:
+              make: Toyota
+              model: Corolla
+              color: Black
+              category: Sedan
+              year: 2024
+              package: XLE
+              mileage: 18500
+              price: 2599000
       responses:
         '201':
           description: Car created successfully.
