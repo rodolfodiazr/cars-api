@@ -6,6 +6,8 @@ info:
 paths:
   /cars:
     get:
+      tags:
+        - cars
       operationId: listCars
       summary: List all cars.
       description: Retrieve a list of cars, optionally filtered by make, model, or year.
