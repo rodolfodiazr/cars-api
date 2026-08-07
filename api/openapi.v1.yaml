@@ -1,341 +1,386 @@
-openapi: 3.0.4
-info:
-  title: Car API
-  version: 1.0.0
-  description: API for managing cars.
-paths:
-  /cars:
-    get:
-      tags:
-        - cars
-      operationId: listCars
-      summary: List all cars.
-      description: Retrieve a list of cars, optionally filtered by make, model, or year.
-      parameters:
-        - name: make
-          in: query
-          required: false
-          description: Filter cars by manufacturer.
-          schema:
+  openapi: 3.0.4
+  info:
+    title: Car API
+    version: 1.0.0
+    description: API for managing cars.
+  paths:
+    /cars:
+      get:
+        tags:
+          - cars
+        operationId: listCars
+        summary: List all cars.
+        description: Retrieve a list of cars, optionally filtered by make, model, or year.
+        parameters:
+          - name: make
+            in: query
+            required: false
+            description: Filter cars by manufacturer.
+            schema:
+              type: string
+              example: Toyota
+          - name: model
+            in: query
+            required: false
+            description: Filter cars by model name.
+            schema:
+              type: string
+              example: Corolla
+          - name: year
+            in: query
+            required: false
+            description: Filter cars by manufacturing year.
+            schema:
+              type: integer
+              format: int32
+              example: 2024
+        responses:
+          '200':
+            description: List of cars.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/CarsResponse"
+                example:
+                  - id: ABC123CD
+                    make: Toyota
+                    model: Corolla
+                    color: Black
+                    category: Sedan
+                    year: 2024
+                    package: XLE
+                    mileage: 18500
+                    price: 2599000
+                  - id: XYZ789AB
+                    make: Honda
+                    model: Civic
+                    color: White
+                    category: Sedan
+                    year: 2023
+                    mileage: 22000
+                    price: 2350000
+          '400':
+            description: Bad request due to invalid query parameters.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '500':
+            description: Internal server error.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+      post:
+        tags:
+          - cars
+        operationId: createCar
+        summary: Create a new car.
+        description: Creates a new car. The server generates the car identifier and returns the created resource.
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarUpsertRequest"
+              example:
+                make: Toyota
+                model: Corolla
+                color: Black
+                category: Sedan
+                year: 2024
+                package: XLE
+                mileage: 18500
+                price: 2599000
+        responses:
+          '201':
+            description: Car created successfully.
+            headers:
+              Location:
+                description: Relative URL of the created car resource.
+                schema:
+                  type: string
+                  example: /cars/ABC123CD
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/CarResponse"
+                example:
+                  id: ABC123CD
+                  make: Toyota
+                  model: Corolla
+                  color: Black
+                  category: Sedan
+                  year: 2024
+                  package: XLE
+                  mileage: 18500
+                  price: 2599000
+          '400':
+            description: Bad request due malformed JSON or validation error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '500':
+            description: Internal server error.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+    /cars/{id}:
+      get:
+        tags:
+          - cars
+        operationId: getCar
+        summary: Get a car by ID.
+        description: Retrieve a specific car using its ID.
+        parameters:
+          - name: id
+            in: path
+            required: true
+            description: Unique identifier of the car.
+            schema:
+              type: string
+              example: ABC123CD
+        responses:
+          '200':
+            description: Car details.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/CarResponse"
+                example:
+                  id: ABC123CD
+                  make: Toyota
+                  model: Corolla
+                  color: Black
+                  category: Sedan
+                  year: 2024
+                  package: XLE
+                  mileage: 18500
+                  price: 2599000
+          '400':
+            description: Bad request due to invalid ID.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '404':
+            description: Car not found.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '500':
+            description: Internal server error.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+      put:
+        tags:
+          - cars
+        operationId: updateCar
+        summary: Update a car by ID.
+        description: Fully replaces an existing car identified by its ID. Partial updates are not supported.
+        parameters:
+          - name: id
+            in: path
+            required: true
+            description: Unique identifier of the car.
+            schema:
+              type: string
+              example: ABC123CD
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarUpsertRequest"
+        responses:
+          '200':
+            description: Car updated successfully.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/CarResponse"
+                example:
+                  id: ABC123CD
+                  make: Toyota
+                  model: Corolla
+                  color: Black
+                  category: Sedan
+                  year: 2024
+                  package: XLE
+                  mileage: 18500
+                  price: 2599000
+          '400':
+            description: Bad request due to invalid ID, malformed JSON, or validation error.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '404':
+            description: Car not found.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '500':
+            description: Internal server error.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+      delete:
+        tags:
+          - cars
+        operationId: deleteCar
+        summary: Delete a car by ID.
+        description: Permanently deletes the car identified by its ID. This operation is irreversible.
+        parameters:
+          - name: id
+            in: path
+            required: true
+            description: Unique identifier of the car.
+            schema:
+              type: string
+              example: ABC123CD
+        responses:
+          '204':
+            description: Car deleted successfully.
+          '400':
+            description: Invalid or missing car ID.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+          '404':
+            description: Car not found.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+          '500':
+            description: Internal server error.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+  components:
+    schemas:
+      CarUpsertRequest:
+        type: object
+        description: Request payload used to create or fully update a car.
+        required:
+          - make
+          - model
+          - color
+          - category
+          - year
+        properties:
+          make:
             type: string
+            description: Manufacturer of the car.
             example: Toyota
-        - name: model
-          in: query
-          required: false
-          description: Filter cars by model name.
-          schema:
+          model:
             type: string
+            description: Model name.
             example: Corolla
-        - name: year
-          in: query
-          required: false
-          description: Filter cars by manufacturing year.
-          schema:
+          color:
+            type: string
+            description: Exterior color.
+            example: Black
+          category:
+            type: string
+            description: Vehicle category.
+            example: Sedan
+          year:
             type: integer
             format: int32
+            description: Manufacturing year.
             example: 2024
-      responses:
-        '200':
-          description: List of cars.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CarsResponse"
-        '400':
-          description: Bad request due to invalid query parameters.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    post:
-      tags:
-        - cars
-      operationId: createCar
-      summary: Create a new car.
-      description: Creates a new car. The server generates the car identifier and returns the created resource.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CarUpsertRequest"
-            example:
-              make: Toyota
-              model: Corolla
-              color: Black
-              category: Sedan
-              year: 2024
-              package: XLE
-              mileage: 18500
-              price: 2599000
-      responses:
-        '201':
-          description: Car created successfully.
-          headers:
-            Location:
-              description: Relative URL of the created car resource.
-              schema:
-                type: string
-                example: /cars/ABC123CD
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CarResponse"
-        '400':
-          description: Bad request due malformed JSON or validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /cars/{id}:
-    get:
-      tags:
-        - cars
-      operationId: getCar
-      summary: Get a car by ID.
-      description: Retrieve a specific car using its ID.
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Unique identifier of the car.
-          schema:
+          package:
             type: string
-            example: ABC123CD
-      responses:
-        '200':
-          description: Car details.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CarResponse"
-        '400':
-          description: Bad request due to invalid ID.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Car not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    put:
-      tags:
-        - cars
-      operationId: updateCar
-      summary: Update a car by ID.
-      description: Fully replaces an existing car identified by its ID. Partial updates are not supported.
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Unique identifier of the car.
-          schema:
+            description: Optional package level.
+            example: XLE
+          mileage:
+            type: integer
+            format: int64
+            description: Mileage of the car.
+            example: 18500
+          price:
+            type: integer
+            format: int64
+            description: Price of the car in cents.
+            example: 2599000
+      CarResponse:
+        type: object
+        description: Represents a car returned by the API.
+        required:
+          - id
+          - make
+          - model
+          - color
+          - category
+          - year
+        properties:
+          id:
             type: string
-            example: ABC123CD
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CarUpsertRequest"
-      responses:
-        '200':
-          description: Car updated successfully.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CarResponse"
-        '400':
-          description: Bad request due to invalid ID, malformed JSON, or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Car not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    delete:
-      tags:
-        - cars
-      operationId: deleteCar
-      summary: Delete a car by ID.
-      description: Permanently deletes the car identified by its ID. This operation is irreversible.
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Unique identifier of the car.
-          schema:
+            description: Unique identifier of the car.
+            example: "5f2b3e8a"
+          make:
             type: string
-            example: ABC123CD
-      responses:
-        '204':
-          description: Car deleted successfully.
-        '400':
-          description: Invalid or missing car ID.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        '404':
-          description: Car not found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        '500':
-          description: Internal server error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-components:
-  schemas:
-    CarUpsertRequest:
-      type: object
-      description: Request payload used to create or fully update a car.
-      required:
-        - make
-        - model
-        - color
-        - category
-        - year
-      properties:
-        make:
-          type: string
-          description: Manufacturer of the car.
-          example: Toyota
-        model:
-          type: string
-          description: Model name.
-          example: Corolla
-        color:
-          type: string
-          description: Exterior color.
-          example: Black
-        category:
-          type: string
-          description: Vehicle category.
-          example: Sedan
-        year:
-          type: integer
-          format: int32
-          description: Manufacturing year.
-          example: 2024
-        package:
-          type: string
-          description: Optional package level.
-          example: XLE
-        mileage:
-          type: integer
-          format: int64
-          description: Mileage of the car.
-          example: 18500
-        price:
-          type: integer
-          format: int64
-          description: Price of the car in cents.
-          example: 2599000
-    CarResponse:
-      type: object
-      description: Represents a car returned by the API.
-      required:
-        - id
-        - make
-        - model
-        - color
-        - category
-        - year
-      properties:
-        id:
-          type: string
-          description: Unique identifier of the car.
-          example: "5f2b3e8a"
-        make:
-          type: string
-          description: Manufacturer of the car.
-          example: Toyota
-        model:
-          type: string
-          description: Model name.
-          example: Corolla
-        color:
-          type: string
-          description: Exterior color.
-          example: Black
-        category:
-          type: string
-          description: Vehicle category.
-          example: Sedan
-        year:
-          type: integer
-          format: int32
-          description: Manufacturing year.
-          example: 2024
-        package:
-          type: string
-          description: Optional package level.
-          example: XLE
-        mileage:
-          type: integer
-          format: int64
-          description: Mileage of the car.
-          example: 18500
-        price:
-          type: integer
-          format: int64
-          description: Price of the car in cents.
-          example: 2599000
-    CarsResponse:
-      type: array
-      items:
-        $ref: "#/components/schemas/CarResponse"
-    ErrorResponse:
-      type: object
-      description: Error response returned when a request cannot be processed.
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: string
-          description: Machine-readable application error code.
-          example: CAR_NOT_FOUND
-        message:
-          type: string
-          description: Human-readable description of the error.
-          example: Car not found
-        details:
-          type: string
-          description: Additional details about the error.
-          example: car not found
+            description: Manufacturer of the car.
+            example: Toyota
+          model:
+            type: string
+            description: Model name.
+            example: Corolla
+          color:
+            type: string
+            description: Exterior color.
+            example: Black
+          category:
+            type: string
+            description: Vehicle category.
+            example: Sedan
+          year:
+            type: integer
+            format: int32
+            description: Manufacturing year.
+            example: 2024
+          package:
+            type: string
+            description: Optional package level.
+            example: XLE
+          mileage:
+            type: integer
+            format: int64
+            description: Mileage of the car.
+            example: 18500
+          price:
+            type: integer
+            format: int64
+            description: Price of the car in cents.
+            example: 2599000
+      CarsResponse:
+        type: array
+        items:
+          $ref: "#/components/schemas/CarResponse"
+      ErrorResponse:
+        type: object
+        description: Error response returned when a request cannot be processed.
+        required:
+          - code
+          - message
+        properties:
+          code:
+            type: string
+            description: Machine-readable application error code.
+          message:
+            type: string
+            description: Human-readable description of the error.
+          details:
+            type: string
+            description: Additional details about the error.
