@@ -54,6 +54,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     post:
+      tags:
+        - cars
       operationId: createCar
       summary: Create a new car.
       description: Creates a new car. The server generates the car identifier and returns the created resource.
@@ -99,6 +101,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /cars/{id}:
     get:
+      tags:
+        - cars
       operationId: getCar
       summary: Get a car by ID.
       description: Retrieve a specific car using its ID.
@@ -136,6 +140,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
+      tags:
+        - cars
       operationId: updateCar
       summary: Update a car by ID.
       description: Fully replaces an existing car identified by its ID. Partial updates are not supported.
@@ -179,6 +185,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     delete:
+      tags:
+        - cars
       operationId: deleteCar
       summary: Delete a car by ID.
       description: Permanently deletes the car identified by its ID. This operation is irreversible.
