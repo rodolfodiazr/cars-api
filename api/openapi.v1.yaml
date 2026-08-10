@@ -9,7 +9,7 @@
         tags:
           - cars
         operationId: listCars
-        summary: List all cars.
+        summary: List cars with optional filters.
         description: Retrieve a list of cars, optionally filtered by make, model, or year.
         parameters:
           - name: make
