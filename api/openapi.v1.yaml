@@ -165,6 +165,10 @@
               application/json:
                 schema:
                   $ref: '#/components/schemas/ErrorResponse'
+                example:
+                  code: "VALIDATION_FAILED"
+                  message: "Validation failed"
+                  details: "<validation error details>"
           '404':
             description: Car not found.
             content:
