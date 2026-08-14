@@ -65,6 +65,10 @@
               application/json:
                 schema:
                   $ref: '#/components/schemas/ErrorResponse'
+                example:
+                  code: "VALIDATION_FAILED"
+                  message: "Validation failed"
+                  details: "<validation error details>"
           '500':
             description: Internal server error.
             content:
@@ -121,6 +125,10 @@
               application/json:
                 schema:
                   $ref: '#/components/schemas/ErrorResponse'
+                example:
+                  code: "VALIDATION_FAILED"
+                  message: "Validation failed"
+                  details: "<validation error details>"
           '500':
             description: Internal server error.
             content:
@@ -224,6 +232,10 @@
               application/json:
                 schema:
                   $ref: '#/components/schemas/ErrorResponse'
+                example:
+                  code: "VALIDATION_FAILED"
+                  message: "Validation failed"
+                  details: "<validation error details>"
           '404':
             description: Car not found.
             content:
@@ -259,6 +271,10 @@
               application/json:
                 schema:
                   $ref: "#/components/schemas/ErrorResponse"
+                example:
+                  code: "VALIDATION_FAILED"
+                  message: "Validation failed"
+                  details: "<validation error details>"
           '404':
             description: Car not found.
             content:
