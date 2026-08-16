@@ -225,7 +225,7 @@ func parseCarFilters(q url.Values) (models.CarFilters, error) {
 		return f, err
 	}
 
-	if f.Make, err = getQueryParam(q, "model"); err != nil {
+	if f.Model, err = getQueryParam(q, "model"); err != nil {
 		return f, err
 	}
 

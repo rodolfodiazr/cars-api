@@ -169,6 +169,22 @@ func Test_Car_List(t *testing.T) {
 			},
 		},
 		{
+			name:        "list filtered by model",
+			queryParams: "?model=Arkana",
+			listFn: func(f models.CarFilters) (models.Cars, error) {
+				if f.Model != "Arkana" {
+					t.Errorf("expected model %s, got %s", "Arkana", f.Model)
+				}
+				return models.Cars{
+					{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: u.Ptr("GHI"), Color: "White", Category: "Sedan", Year: 2025},
+				}, nil
+			},
+			expectedStatus: http.StatusOK,
+			expectedResponse: models.Cars{
+				{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: u.Ptr("GHI"), Color: "White", Category: "Sedan", Year: 2025},
+			},
+		},
+		{
 			name:             "invalid params",
 			queryParams:      "?year=MMXXV",
 			expectedStatus:   http.StatusBadRequest,
@@ -295,9 +311,7 @@ func Test_Car_Create(t *testing.T) {
 			name: "car created successfully",
 			body: `{"make": "Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
 			createFn: func(car *models.Car) error {
-				fmt.Println("car: ", car)
 				car.ID = "A1"
-				fmt.Println("car 2: ", car)
 				return nil
 			},
 			expectedStatus: http.StatusCreated,
