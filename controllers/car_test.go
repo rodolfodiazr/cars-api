@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"cars/api/dto"
 	"cars/models"
 	e "cars/pkg/errors"
 	"cars/pkg/httpx"
@@ -8,7 +9,6 @@ import (
 	"cars/services"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -153,7 +153,7 @@ func Test_Car_List(t *testing.T) {
 		expectedResponse any
 	}{
 		{
-			name: "list with 3 cars",
+			name: "list all cars",
 			listFn: func(f models.CarFilters) (models.Cars, error) {
 				return models.Cars{
 					{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: u.Ptr("ABC"), Color: "Black", Category: "Sedan", Year: 2025},
@@ -162,10 +162,26 @@ func Test_Car_List(t *testing.T) {
 				}, nil
 			},
 			expectedStatus: http.StatusOK,
-			expectedResponse: models.Cars{
+			expectedResponse: []dto.CarResponse{
 				{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: u.Ptr("ABC"), Color: "Black", Category: "Sedan", Year: 2025},
 				{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: u.Ptr("DEF"), Color: "Red", Category: "Sedan", Year: 2025},
 				{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: u.Ptr("GHI"), Color: "White", Category: "Sedan", Year: 2025},
+			},
+		},
+		{
+			name:        "list filtered by make",
+			queryParams: "?make=Toyota",
+			listFn: func(f models.CarFilters) (models.Cars, error) {
+				if f.Make != "Toyota" {
+					t.Errorf("expected make %q, got %q", "Toyota", f.Make)
+				}
+				return models.Cars{
+					{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: u.Ptr("DEF"), Color: "Red", Category: "Sedan", Year: 2025},
+				}, nil
+			},
+			expectedStatus: http.StatusOK,
+			expectedResponse: []dto.CarResponse{
+				{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: u.Ptr("DEF"), Color: "Red", Category: "Sedan", Year: 2025},
 			},
 		},
 		{
@@ -173,19 +189,38 @@ func Test_Car_List(t *testing.T) {
 			queryParams: "?model=Arkana",
 			listFn: func(f models.CarFilters) (models.Cars, error) {
 				if f.Model != "Arkana" {
-					t.Errorf("expected model %s, got %s", "Arkana", f.Model)
+					t.Errorf("expected model %q, got %q", "Arkana", f.Model)
 				}
 				return models.Cars{
 					{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: u.Ptr("GHI"), Color: "White", Category: "Sedan", Year: 2025},
 				}, nil
 			},
 			expectedStatus: http.StatusOK,
-			expectedResponse: models.Cars{
+			expectedResponse: []dto.CarResponse{
 				{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: u.Ptr("GHI"), Color: "White", Category: "Sedan", Year: 2025},
 			},
 		},
 		{
-			name:             "invalid params",
+			name:        "list filtered by year",
+			queryParams: "?year=2025",
+			listFn: func(f models.CarFilters) (models.Cars, error) {
+				if f.Year == nil {
+					t.Fatal("expected year filter")
+				}
+				if *f.Year != 2025 {
+					t.Errorf("expected year %d, got %d", 2025, *f.Year)
+				}
+				return models.Cars{
+					{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Color: "Black", Category: "Sedan", Year: 2025},
+				}, nil
+			},
+			expectedStatus: http.StatusOK,
+			expectedResponse: []dto.CarResponse{
+				{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Color: "Black", Category: "Sedan", Year: 2025},
+			},
+		},
+		{
+			name:             "invalid year",
 			queryParams:      "?year=MMXXV",
 			expectedStatus:   http.StatusBadRequest,
 			expectedResponse: httpx.ErrorResponse{Message: "Validation failed"},
@@ -213,8 +248,9 @@ func Test_Car_List(t *testing.T) {
 				r.Get("/", controller.List)
 			})
 
+			req := httptest.NewRequest(http.MethodGet, "/cars"+tc.queryParams, nil)
+
 			resp := httptest.NewRecorder()
-			req := httptest.NewRequest("GET", fmt.Sprintf("%s%s", "/cars", tc.queryParams), nil)
 
 			router.ServeHTTP(resp, req)
 
@@ -223,31 +259,24 @@ func Test_Car_List(t *testing.T) {
 				t.Fatalf("expected status %d, got %d", tc.expectedStatus, resp.Code)
 			}
 
-			body := resp.Body.Bytes()
-
 			switch expected := tc.expectedResponse.(type) {
 			case httpx.ErrorResponse:
 				var got httpx.ErrorResponse
-				if err := json.Unmarshal(body, &got); err != nil {
-					t.Fatal(err)
+				if err := json.Unmarshal(resp.Body.Bytes(), &got); err != nil {
+					t.Fatalf("failed to decode error response: %v", err)
 				}
 
 				if got.Message != expected.Message {
-					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
+					t.Errorf("expected message %q, got %q", expected.Message, got.Message)
 				}
-			case models.Cars:
-				var gotCars models.Cars
-				if err := json.Unmarshal(body, &gotCars); err != nil {
-					t.Fatal(err)
-				}
-
-				expectedCars := tc.expectedResponse.(models.Cars)
-				if len(gotCars) != len(expectedCars) {
-					t.Fatalf("expected %d cars, got %d", len(expectedCars), len(gotCars))
+			case []dto.CarResponse:
+				var got []dto.CarResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &got); err != nil {
+					t.Fatalf("failed to decode response: %v", err)
 				}
 
-				if !reflect.DeepEqual(gotCars, expectedCars) {
-					t.Fatalf("expected cars %+v, got %+v", expectedCars, gotCars)
+				if !reflect.DeepEqual(got, expected) {
+					t.Errorf("expected response %+v, got %+v", expected, got)
 				}
 			}
 		})
