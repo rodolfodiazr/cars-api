@@ -289,6 +289,7 @@ func Test_Car_Create(t *testing.T) {
 		body             string
 		createFn         func(car *models.Car) error
 		expectedStatus   int
+		expectedLocation string
 		expectedResponse any
 	}{
 		{
@@ -338,13 +339,14 @@ func Test_Car_Create(t *testing.T) {
 		},
 		{
 			name: "car created successfully",
-			body: `{"make": "Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
+			body: `{"make":"Chevrolet","model":"Onix","color":"Gray","category":"Sedan","year":2025}`,
 			createFn: func(car *models.Car) error {
 				car.ID = "A1"
 				return nil
 			},
-			expectedStatus: http.StatusCreated,
-			expectedResponse: models.Car{
+			expectedStatus:   http.StatusCreated,
+			expectedLocation: "/cars/A1",
+			expectedResponse: dto.CarResponse{
 				ID:       "A1",
 				Make:     "Chevrolet",
 				Model:    "Onix",
@@ -379,27 +381,31 @@ func Test_Car_Create(t *testing.T) {
 				t.Fatalf("expected status %v, got %v", tc.expectedStatus, resp.Code)
 			}
 
-			body := resp.Body.Bytes()
+			if tc.expectedLocation != "" {
+				gotLocation := resp.Header().Get("Location")
+				if gotLocation != tc.expectedLocation {
+					t.Fatalf("expected Location %q, got %q", tc.expectedLocation, gotLocation)
+				}
+			}
 
 			switch expected := tc.expectedResponse.(type) {
 			case httpx.ErrorResponse:
 				var got httpx.ErrorResponse
-				if err := json.Unmarshal(body, &got); err != nil {
+				if err := json.Unmarshal(resp.Body.Bytes(), &got); err != nil {
 					t.Fatal(err)
 				}
 
 				if got.Message != expected.Message {
 					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
 				}
-			case models.Car:
-				var gotCar models.Car
-				if err := json.Unmarshal(body, &gotCar); err != nil {
+			case dto.CarResponse:
+				var got dto.CarResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &got); err != nil {
 					t.Fatal(err)
 				}
 
-				expectedCar := tc.expectedResponse.(models.Car)
-				if !reflect.DeepEqual(gotCar, expectedCar) {
-					t.Fatalf("expected car %+v, got %+v", expectedCar, gotCar)
+				if !reflect.DeepEqual(got, expected) {
+					t.Fatalf("expected car %+v, got %+v", expected, got)
 				}
 			}
 		})
