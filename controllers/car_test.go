@@ -525,27 +525,24 @@ func Test_Car_Update(t *testing.T) {
 				t.Fatalf("expected status %v, got %v", tc.expectedStatus, resp.Code)
 			}
 
-			body := resp.Body.Bytes()
-
 			switch expected := tc.expectedResponse.(type) {
 			case httpx.ErrorResponse:
 				var got httpx.ErrorResponse
-				if err := json.Unmarshal(body, &got); err != nil {
+				if err := json.Unmarshal(resp.Body.Bytes(), &got); err != nil {
 					t.Fatal(err)
 				}
 
 				if got.Message != expected.Message {
 					t.Fatalf("expected error %v, got %v", expected.Message, got.Message)
 				}
-			case models.Car:
-				var gotCar models.Car
-				if err := json.Unmarshal(body, &gotCar); err != nil {
+			case dto.CarResponse:
+				var gotCar dto.CarResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &gotCar); err != nil {
 					t.Fatal(err)
 				}
 
-				expectedCar := tc.expectedResponse.(models.Car)
-				if !reflect.DeepEqual(gotCar, expectedCar) {
-					t.Fatalf("expected car %+v, got %+v", expectedCar, gotCar)
+				if !reflect.DeepEqual(gotCar, expected) {
+					t.Fatalf("expected car %+v, got %+v", expected, gotCar)
 				}
 			}
 		})
