@@ -338,13 +338,13 @@ func Test_Car_Create(t *testing.T) {
 			name: "car created successfully",
 			body: `{"make":"Chevrolet","model":"Onix","color":"Gray","category":"Sedan","year":2025}`,
 			createFn: func(car *models.Car) error {
-				car.ID = "A1"
+				car.ID = "ABC123"
 				return nil
 			},
 			expectedStatus:   http.StatusCreated,
-			expectedLocation: "/cars/A1",
+			expectedLocation: "/cars/ABC123",
 			expectedResponse: dto.CarResponse{
-				ID:       "A1",
+				ID:       "ABC123",
 				Make:     "Chevrolet",
 				Model:    "Onix",
 				Color:    "Gray",
@@ -488,13 +488,14 @@ func Test_Car_Update(t *testing.T) {
 				return nil
 			},
 			expectedStatus: http.StatusOK,
-			expectedResponse: models.Car{
+			expectedResponse: dto.CarResponse{
 				ID:       "ABC123",
 				Make:     "Chevrolet",
 				Model:    "Onix",
 				Color:    "Gray",
 				Category: "Sedan",
-				Year:     2025},
+				Year:     2025,
+			},
 		},
 	}
 
