@@ -4,6 +4,7 @@ import (
 	"cars/models"
 	e "cars/pkg/errors"
 	"errors"
+	"net/http"
 	"reflect"
 	"testing"
 )
@@ -104,6 +105,20 @@ func TestDefaultCarService_Find(t *testing.T) {
 
 		if serviceError.Code != e.CodeCarNotFound {
 			t.Fatalf("expected CAR_NOT_FOUND, got %v", serviceError.Code)
+		}
+
+		if serviceError.Message != "Car not found" {
+			t.Fatalf("expected message %q, got %q",
+				"Car not found",
+				serviceError.Message,
+			)
+		}
+
+		if serviceError.StatusCode != http.StatusNotFound {
+			t.Fatalf("expected status %d, got %d",
+				http.StatusNotFound,
+				serviceError.StatusCode,
+			)
 		}
 	})
 
