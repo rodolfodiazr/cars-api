@@ -43,6 +43,43 @@ func (m *MockCarRepository) Delete(id string) error {
 	return m.DeleteFn(id)
 }
 
+func assertServiceError(t *testing.T, err error, expected *e.ServiceError) {
+	t.Helper()
+
+	if err == nil {
+		t.Fatal("expected error but got nil")
+	}
+
+	var got *e.ServiceError
+	if !errors.As(err, &got) {
+		t.Fatalf("expected ServiceError, got %T", err)
+	}
+
+	if got.Code != expected.Code {
+		t.Errorf("expected code %q, got %q", expected.Code, got.Code)
+	}
+
+	if got.Message != expected.Message {
+		t.Errorf("expected message %q, got %q", expected.Message, got.Message)
+	}
+
+	if got.StatusCode != expected.StatusCode {
+		t.Errorf(
+			"expected status code %d, got %d",
+			expected.StatusCode,
+			got.StatusCode,
+		)
+	}
+
+	if !errors.Is(got.Err, expected.Err) {
+		t.Errorf(
+			"expected underlying error %v, got %v",
+			expected.Err,
+			got.Err,
+		)
+	}
+}
+
 func TestDefaultCarService_Find(t *testing.T) {
 	t.Run("should return car when repository finds it", func(t *testing.T) {
 		// Arrange
@@ -206,9 +243,16 @@ func TestDefaultCarService_List(t *testing.T) {
 		// Arrange
 		expectedErr := errors.New("database unavailable")
 
+		expected := &e.ServiceError{
+			Code:       e.CodeInternalError,
+			Message:    "Internal server error",
+			StatusCode: http.StatusInternalServerError,
+			Err:        expectedErr,
+		}
+
 		repo := &MockCarRepository{
 			ListFn: func(f models.CarFilters) (models.Cars, error) {
-				return models.Cars{}, expectedErr
+				return nil, expectedErr
 			},
 		}
 
@@ -220,18 +264,7 @@ func TestDefaultCarService_List(t *testing.T) {
 		_, err := service.List(models.CarFilters{})
 
 		// Assert
-		if err == nil {
-			t.Fatal("expected error but got nil")
-		}
-
-		var serviceError *e.ServiceError
-		if !errors.As(err, &serviceError) {
-			t.Fatalf("expected ServiceError, got %T", err)
-		}
-
-		if serviceError.Code != e.CodeInternalError {
-			t.Fatalf("expected INTERNAL_ERROR, got %v", serviceError.Code)
-		}
+		assertServiceError(t, err, expected)
 	})
 }
 
