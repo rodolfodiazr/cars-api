@@ -117,6 +117,13 @@ func TestDefaultCarService_Find(t *testing.T) {
 
 	t.Run("should return car not found error when repository returns ErrCarNotFound", func(t *testing.T) {
 		// Arrange
+		expected := &e.ServiceError{
+			Code:       e.CodeCarNotFound,
+			Message:    "Car not found",
+			StatusCode: http.StatusNotFound,
+			Err:        e.ErrCarNotFound,
+		}
+
 		repo := &MockCarRepository{
 			FindFn: func(id string) (models.Car, error) {
 				return models.Car{}, e.ErrCarNotFound
@@ -131,37 +138,19 @@ func TestDefaultCarService_Find(t *testing.T) {
 		_, err := service.Find("missing-id")
 
 		// Assert
-		if err == nil {
-			t.Fatal("expected error but got nil")
-		}
-
-		var serviceError *e.ServiceError
-		if !errors.As(err, &serviceError) {
-			t.Fatalf("expected ServiceError, got %T", err)
-		}
-
-		if serviceError.Code != e.CodeCarNotFound {
-			t.Fatalf("expected CAR_NOT_FOUND, got %v", serviceError.Code)
-		}
-
-		if serviceError.Message != "Car not found" {
-			t.Fatalf("expected message %q, got %q",
-				"Car not found",
-				serviceError.Message,
-			)
-		}
-
-		if serviceError.StatusCode != http.StatusNotFound {
-			t.Fatalf("expected status %d, got %d",
-				http.StatusNotFound,
-				serviceError.StatusCode,
-			)
-		}
+		assertServiceError(t, err, expected)
 	})
 
 	t.Run("should return internal error for unexpected repository errors", func(t *testing.T) {
 		// Arrange
 		expectedErr := errors.New("database unavailable")
+
+		expected := &e.ServiceError{
+			Code:       e.CodeInternalError,
+			Message:    "Internal server error",
+			StatusCode: http.StatusInternalServerError,
+			Err:        expectedErr,
+		}
 
 		repo := &MockCarRepository{
 			FindFn: func(id string) (models.Car, error) {
@@ -177,18 +166,7 @@ func TestDefaultCarService_Find(t *testing.T) {
 		_, err := service.Find("1")
 
 		// Assert
-		if err == nil {
-			t.Fatal("expected error but got nil")
-		}
-
-		var serviceError *e.ServiceError
-		if !errors.As(err, &serviceError) {
-			t.Fatalf("expected ServiceError, got %T", err)
-		}
-
-		if serviceError.Code != e.CodeInternalError {
-			t.Fatalf("expected INTERNAL_ERROR, got %v", serviceError.Code)
-		}
+		assertServiceError(t, err, expected)
 	})
 }
 
