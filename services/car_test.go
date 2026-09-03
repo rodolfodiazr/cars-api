@@ -381,6 +381,13 @@ func TestDefaultCarService_Update(t *testing.T) {
 
 	t.Run("should return validation error when car is invalid", func(t *testing.T) {
 		// Arrange
+		expected := &e.ServiceError{
+			Code:       e.CodeValidationFailed,
+			Message:    "Validation failed",
+			StatusCode: http.StatusBadRequest,
+			Err:        models.ErrCarIDRequiredForUpdate,
+		}
+
 		car := &models.Car{}
 
 		repo := &MockCarRepository{
@@ -398,18 +405,7 @@ func TestDefaultCarService_Update(t *testing.T) {
 		err := service.Update(car)
 
 		// Assert
-		if err == nil {
-			t.Fatal("expected error but got nil")
-		}
-
-		var serviceError *e.ServiceError
-		if !errors.As(err, &serviceError) {
-			t.Fatalf("expected ServiceError, got %T", err)
-		}
-
-		if serviceError.Code != e.CodeValidationFailed {
-			t.Fatalf("expected VALIDATION_FAILED, got %v", serviceError.Code)
-		}
+		assertServiceError(t, err, expected)
 	})
 
 	t.Run("should return car not found error when repository returns ErrCarNotFound", func(t *testing.T) {
