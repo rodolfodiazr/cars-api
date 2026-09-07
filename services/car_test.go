@@ -445,6 +445,15 @@ func TestDefaultCarService_Update(t *testing.T) {
 
 	t.Run("should return internal error when repository fails unexpectedly", func(t *testing.T) {
 		// Arrange
+		expectedErr := errors.New("database unavailable")
+
+		expected := &e.ServiceError{
+			Code:       e.CodeInternalError,
+			Message:    "Internal server error",
+			StatusCode: http.StatusInternalServerError,
+			Err:        expectedErr,
+		}
+
 		car := &models.Car{
 			ID:       "1",
 			Make:     "Toyota",
@@ -453,8 +462,6 @@ func TestDefaultCarService_Update(t *testing.T) {
 			Category: "Sedan",
 			Year:     2026,
 		}
-
-		expectedErr := errors.New("database unavailable")
 
 		repo := &MockCarRepository{
 			UpdateFn: func(c *models.Car) error {
@@ -470,18 +477,7 @@ func TestDefaultCarService_Update(t *testing.T) {
 		err := service.Update(car)
 
 		// Assert
-		if err == nil {
-			t.Fatal("expected error but got nil")
-		}
-
-		var serviceError *e.ServiceError
-		if !errors.As(err, &serviceError) {
-			t.Fatalf("expected ServiceError, got %T", err)
-		}
-
-		if serviceError.Code != e.CodeInternalError {
-			t.Fatalf("expected INTERNAL_ERROR, got %v", serviceError.Code)
-		}
+		assertServiceError(t, err, expected)
 	})
 }
 
