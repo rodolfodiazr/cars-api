@@ -510,6 +510,13 @@ func TestDefaultCarService_Delete(t *testing.T) {
 
 	t.Run("should return car not found error when repository returns ErrCarNotFound", func(t *testing.T) {
 		// Arrange
+		expected := &e.ServiceError{
+			Code:       e.CodeCarNotFound,
+			Message:    "Car not found",
+			StatusCode: http.StatusNotFound,
+			Err:        e.ErrCarNotFound,
+		}
+
 		repo := &MockCarRepository{
 			DeleteFn: func(id string) error {
 				return e.ErrCarNotFound
@@ -524,18 +531,7 @@ func TestDefaultCarService_Delete(t *testing.T) {
 		err := service.Delete("missing-id")
 
 		// Assert
-		if err == nil {
-			t.Fatal("expected error but got nil")
-		}
-
-		var serviceError *e.ServiceError
-		if !errors.As(err, &serviceError) {
-			t.Fatalf("expected ServiceError, got %T", err)
-		}
-
-		if serviceError.Code != e.CodeCarNotFound {
-			t.Fatalf("expected CAR_NOT_FOUND, got %v", serviceError.Code)
-		}
+		assertServiceError(t, err, expected)
 	})
 
 	t.Run("should return internal error when repository fails unexpectedly", func(t *testing.T) {
