@@ -8,6 +8,18 @@ import (
 	"testing"
 )
 
+func assertRepositoryError(t *testing.T, err, eerr error) {
+	t.Helper()
+
+	if err == nil {
+		t.Fatalf("expected error but got nil")
+	}
+
+	if !errors.Is(err, eerr) {
+		t.Fatalf("expected %v, got %v", eerr, err)
+	}
+}
+
 func TestDefaultCarRepository_Find(t *testing.T) {
 	t.Run("should return car when it exists", func(t *testing.T) {
 		// Arrange
@@ -46,13 +58,7 @@ func TestDefaultCarRepository_Find(t *testing.T) {
 		_, err := repo.Find("missing-id")
 
 		// Assert
-		if err == nil {
-			t.Fatalf("expected error, got nil")
-		}
-
-		if !errors.Is(err, e.ErrCarNotFound) {
-			t.Fatalf("expected %v, got %v", e.ErrCarNotFound, err)
-		}
+		assertRepositoryError(t, err, e.ErrCarNotFound)
 	})
 }
 
