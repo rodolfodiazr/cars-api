@@ -330,12 +330,6 @@ func TestDefaultCarRepository_Delete(t *testing.T) {
 		err := repo.Delete("missing-id")
 
 		// Assert
-		if err == nil {
-			t.Fatal("expected error but got nil")
-		}
-
-		if !errors.Is(err, e.ErrCarNotFound) {
-			t.Fatalf("expected ErrCarNotFound, got %v", err)
-		}
+		assertRepositoryError(t, err, e.ErrCarNotFound)
 	})
 }
