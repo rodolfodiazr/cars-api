@@ -2,7 +2,8 @@ package controllers
 
 import (
 	"cars/api/dto"
-	"cars/models"
+	"cars/api/mappers.go"
+	c "cars/car"
 	"cars/pkg/httpx"
 	"cars/pkg/logger"
 	"cars/services"
@@ -49,7 +50,7 @@ func (c *CarController) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := dto.ToResponse(&car)
+	resp := mappers.ToResponse(&car)
 
 	if err := httpx.JSON(w, http.StatusOK, resp); err != nil {
 		log.Printf("error encoding car response: %v", err)
@@ -85,7 +86,7 @@ func (c *CarController) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := dto.ToResponseList(cars)
+	resp := mappers.ToResponseList(cars)
 
 	if err := httpx.JSON(w, http.StatusOK, resp); err != nil {
 		log.Printf("error encoding cars response: %v", err)
@@ -113,7 +114,7 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	car := dto.ToModelCreate(*req)
+	car := mappers.ToModelCreate(*req)
 
 	if err := c.service.Create(car); err != nil {
 		log.Printf("error creating car: %v", err)
@@ -121,7 +122,7 @@ func (c *CarController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := dto.ToResponse(car)
+	resp := mappers.ToResponse(car)
 
 	w.Header().Set("Location", fmt.Sprintf("/cars/%s", car.ID))
 	if err := httpx.JSON(w, http.StatusCreated, resp); err != nil {
@@ -159,7 +160,7 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	car := dto.ToModelUpdate(id, *req)
+	car := mappers.ToModelUpdate(id, *req)
 
 	if err := c.service.Update(car); err != nil {
 		log.Printf("error updating car id=%s: %v", car.ID, err)
@@ -167,7 +168,7 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := dto.ToResponse(car)
+	resp := mappers.ToResponse(car)
 
 	if err := httpx.JSON(w, http.StatusOK, resp); err != nil {
 		log.Printf("error encoding updated car response: %v", err)
@@ -217,8 +218,8 @@ func getIDParam(r *http.Request) (string, error) {
 }
 
 // parseCarFilters converts URL query parameters into a CarFilters struct.
-func parseCarFilters(q url.Values) (models.CarFilters, error) {
-	var f models.CarFilters
+func parseCarFilters(q url.Values) (c.CarFilters, error) {
+	var f c.CarFilters
 	var err error
 
 	if f.Make, err = getQueryParam(q, "make"); err != nil {

@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"cars/models"
+	c "cars/car"
 	e "cars/pkg/errors"
 	"cars/pkg/utils"
 	"strings"
@@ -10,23 +10,23 @@ import (
 
 // CarRepository defines methods for managing car persistence.
 type CarRepository interface {
-	Find(id string) (models.Car, error)
-	List(filters models.CarFilters) (models.Cars, error)
-	Create(car *models.Car) error
-	Update(car *models.Car) error
+	Find(id string) (c.Car, error)
+	List(filters c.CarFilters) (c.Cars, error)
+	Create(car *c.Car) error
+	Update(car *c.Car) error
 	Delete(id string) error
 }
 
 // DefaultCarRepository is an in-memory implementation of CarRepository.
 type DefaultCarRepository struct {
-	cars map[string]models.Car
+	cars map[string]c.Car
 	mu   sync.RWMutex
 }
 
 // NewCarRepository creates a new instance of DefaultCarRepository with initial data.
-func NewCarRepository(initialData map[string]models.Car) CarRepository {
+func NewCarRepository(initialData map[string]c.Car) CarRepository {
 	if initialData == nil {
-		initialData = make(map[string]models.Car)
+		initialData = make(map[string]c.Car)
 	}
 
 	repo := &DefaultCarRepository{
@@ -36,23 +36,23 @@ func NewCarRepository(initialData map[string]models.Car) CarRepository {
 }
 
 // Find searches for a car by its ID.
-func (r *DefaultCarRepository) Find(id string) (models.Car, error) {
+func (r *DefaultCarRepository) Find(id string) (c.Car, error) {
 	r.mu.RLock()
 	car, exists := r.cars[id]
 	r.mu.RUnlock()
 
 	if !exists {
-		return models.Car{}, e.ErrCarNotFound
+		return c.Car{}, e.ErrCarNotFound
 	}
 	return car, nil
 }
 
 // List returns all stored cars.
-func (r *DefaultCarRepository) List(f models.CarFilters) (models.Cars, error) {
+func (r *DefaultCarRepository) List(f c.CarFilters) (c.Cars, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	list := make(models.Cars, 0, len(r.cars))
+	list := make(c.Cars, 0, len(r.cars))
 
 	for _, car := range r.cars {
 		if f.Make != "" && !strings.EqualFold(car.Make, f.Make) {
@@ -71,7 +71,7 @@ func (r *DefaultCarRepository) List(f models.CarFilters) (models.Cars, error) {
 }
 
 // Create stores a new car in the repository.
-func (r *DefaultCarRepository) Create(car *models.Car) error {
+func (r *DefaultCarRepository) Create(car *c.Car) error {
 	id, err := utils.GenerateID()
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func (r *DefaultCarRepository) Create(car *models.Car) error {
 }
 
 // Update updates an existing car in the repository.
-func (r *DefaultCarRepository) Update(car *models.Car) error {
+func (r *DefaultCarRepository) Update(car *c.Car) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

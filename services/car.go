@@ -1,7 +1,7 @@
 package services
 
 import (
-	"cars/models"
+	c "cars/car"
 	e "cars/pkg/errors"
 	"cars/repositories"
 	"errors"
@@ -9,10 +9,11 @@ import (
 
 // CarService defines available operations for managing cars.
 type CarService interface {
-	Find(id string) (models.Car, error)
-	List(filters models.CarFilters) (models.Cars, error)
-	Create(car *models.Car) error
-	Update(car *models.Car) error
+	Find(id string) (c.Car, error)
+	List(filters c.CarFilters) (c.Cars, error)
+	Create(car *c.Car) error
+	Update(car *c.Car) error
+	PartialUpdate(params c.CarUpdateParams) error
 	Delete(id string) error
 }
 
@@ -29,30 +30,30 @@ func NewCarService(repo repositories.CarRepository) CarService {
 }
 
 // Find retrieves a car by its ID if it exists.
-func (s *DefaultCarService) Find(id string) (models.Car, error) {
+func (s *DefaultCarService) Find(id string) (c.Car, error) {
 	car, err := s.repo.Find(id)
 	if err != nil {
 		if errors.Is(err, e.ErrCarNotFound) {
-			return models.Car{}, e.NewCarNotFoundError(err)
+			return c.Car{}, e.NewCarNotFoundError(err)
 		}
 
-		return models.Car{}, e.NewInternalError(err)
+		return c.Car{}, e.NewInternalError(err)
 	}
 	return car, nil
 }
 
 // List retrieves all available cars.
-func (s *DefaultCarService) List(f models.CarFilters) (models.Cars, error) {
+func (s *DefaultCarService) List(f c.CarFilters) (c.Cars, error) {
 	cars, err := s.repo.List(f)
 	if err != nil {
-		return models.Cars{}, e.NewInternalError(err)
+		return c.Cars{}, e.NewInternalError(err)
 	}
 	return cars, nil
 }
 
 // Create adds a new car to the repository.
 // The car must contain all required fields.
-func (s *DefaultCarService) Create(car *models.Car) error {
+func (s *DefaultCarService) Create(car *c.Car) error {
 	if err := car.ValidateForCreate(); err != nil {
 		return e.NewValidationError(err)
 	}
@@ -65,7 +66,7 @@ func (s *DefaultCarService) Create(car *models.Car) error {
 
 // Update replaces an existing car with the provided data.
 // The car must contain all required fields and a valid ID.
-func (s *DefaultCarService) Update(car *models.Car) error {
+func (s *DefaultCarService) Update(car *c.Car) error {
 	if err := car.ValidateForUpdate(); err != nil {
 		return e.NewValidationError(err)
 	}
@@ -76,6 +77,11 @@ func (s *DefaultCarService) Update(car *models.Car) error {
 		}
 		return e.NewInternalError(err)
 	}
+	return nil
+}
+
+// PartialUpdate ...
+func (s *DefaultCarService) PartialUpdate(params c.CarUpdateParams) error {
 	return nil
 }
 

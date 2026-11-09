@@ -1,12 +1,12 @@
 package data
 
 import (
-	"cars/models"
+	c "cars/car"
 	u "cars/pkg/utils"
 )
 
-func Cars() map[string]models.Car {
-	return map[string]models.Car{
+func Cars() map[string]c.Car {
+	return map[string]c.Car{
 		"JHK290XJ": {
 			ID:   "JHK290XJ",
 			Make: "Ford", Model: "F10", Package: u.Ptr("Base"),

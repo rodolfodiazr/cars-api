@@ -1,14 +1,15 @@
-package dto
+package mappers
 
 import (
-	"cars/models"
+	"cars/api/dto"
+	c "cars/car"
 )
 
 // ToModelCreate maps a CreateCarRequest to a Car model.
 //
 // It is intended for create operations, where the ID is generated
 // by the system and must not be set in the request.
-func ToModelCreate(req CreateCarRequest) *models.Car {
+func ToModelCreate(req dto.CreateCarRequest) *c.Car {
 	return toModel(req)
 }
 
@@ -17,7 +18,7 @@ func ToModelCreate(req CreateCarRequest) *models.Car {
 //
 // It is intended for update operations, where the ID identifies
 // the existing resource being modified.
-func ToModelUpdate(id string, req UpdateCarRequest) *models.Car {
+func ToModelUpdate(id string, req dto.UpdateCarRequest) *c.Car {
 	car := toModel(req)
 	car.ID = id
 	return car
@@ -26,8 +27,8 @@ func ToModelUpdate(id string, req UpdateCarRequest) *models.Car {
 // toModel maps a CarUpsertRequest to a Car model.
 //
 // It is an internal helper shared by create and update mappings.
-func toModel(req CarUpsertRequest) *models.Car {
-	return &models.Car{
+func toModel(req dto.CarUpsertRequest) *c.Car {
+	return &c.Car{
 		Make:     req.Make,
 		Model:    req.Model,
 		Color:    req.Color,
@@ -42,12 +43,12 @@ func toModel(req CarUpsertRequest) *models.Car {
 // ToResponse maps a Car model to a CarResponse.
 //
 // If the provided car is nil, it returns an empty response.
-func ToResponse(car *models.Car) CarResponse {
+func ToResponse(car *c.Car) dto.CarResponse {
 	if car == nil {
-		return CarResponse{}
+		return dto.CarResponse{}
 	}
 
-	return CarResponse{
+	return dto.CarResponse{
 		ID:       car.ID,
 		Make:     car.Make,
 		Model:    car.Model,
@@ -61,8 +62,8 @@ func ToResponse(car *models.Car) CarResponse {
 }
 
 // ToResponseList maps a collection of Car models to a slice of CarResponse.
-func ToResponseList(cars models.Cars) []CarResponse {
-	out := make([]CarResponse, len(cars))
+func ToResponseList(cars c.Cars) []dto.CarResponse {
+	out := make([]dto.CarResponse, len(cars))
 	for i := range cars {
 		out[i] = ToResponse(&cars[i])
 	}
