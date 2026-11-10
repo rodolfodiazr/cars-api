@@ -13,6 +13,7 @@ type CarRepository interface {
 	Find(id string) (c.Car, error)
 	List(filters c.CarFilters) (c.Cars, error)
 	Create(car *c.Car) error
+	PartialUpdate(params c.CarUpdateParams) (c.Car, error)
 	Update(car *c.Car) error
 	Delete(id string) error
 }
@@ -97,6 +98,46 @@ func (r *DefaultCarRepository) Update(car *c.Car) error {
 
 	r.cars[car.ID] = *car
 	return nil
+}
+
+// PartialUpdate partially updates an existing car in the repository.
+func (r *DefaultCarRepository) PartialUpdate(params c.CarUpdateParams) (c.Car, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	storedCar, exists := r.cars[params.ID]
+	if !exists {
+		return c.Car{}, e.ErrCarNotFound
+	}
+
+	updatedCar := storedCar
+	if params.Make != nil {
+		updatedCar.Make = *params.Make
+	}
+	if params.Model != nil {
+		updatedCar.Model = *params.Model
+	}
+	if params.Color != nil {
+		updatedCar.Color = *params.Color
+	}
+	if params.Category != nil {
+		updatedCar.Category = *params.Category
+	}
+	if params.Year != nil {
+		updatedCar.Year = *params.Year
+	}
+	if params.Package != nil {
+		updatedCar.Package = params.Package
+	}
+	if params.Mileage != nil {
+		updatedCar.Mileage = params.Mileage
+	}
+	if params.Price != nil {
+		updatedCar.Price = params.Price
+	}
+	r.cars[params.ID] = updatedCar
+
+	return updatedCar, nil
 }
 
 // Delete removes a car identified by the given id from the repository.

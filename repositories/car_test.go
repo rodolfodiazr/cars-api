@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"cars/models"
+	c "cars/car"
 	e "cars/pkg/errors"
 	u "cars/pkg/utils"
 	"errors"
@@ -23,14 +23,14 @@ func assertRepositoryError(t *testing.T, err, eerr error) {
 func TestDefaultCarRepository_Find(t *testing.T) {
 	t.Run("should return car when it exists", func(t *testing.T) {
 		// Arrange
-		expected := models.Car{
+		expected := c.Car{
 			ID:    "1",
 			Make:  "Toyota",
 			Model: "Corolla",
 		}
 
 		repo := &DefaultCarRepository{
-			cars: map[string]models.Car{
+			cars: map[string]c.Car{
 				expected.ID: expected,
 			},
 		}
@@ -51,7 +51,7 @@ func TestDefaultCarRepository_Find(t *testing.T) {
 	t.Run("should return error when car does not exist", func(t *testing.T) {
 		// Arrange
 		repo := &DefaultCarRepository{
-			cars: map[string]models.Car{},
+			cars: map[string]c.Car{},
 		}
 
 		// Act
@@ -64,7 +64,7 @@ func TestDefaultCarRepository_Find(t *testing.T) {
 
 func TestDefaultCarRepository_List(t *testing.T) {
 	// Initial seed data
-	cars := map[string]models.Car{
+	cars := map[string]c.Car{
 		"1": {
 			ID:   "1",
 			Make: "Ford", Model: "F10", Package: u.Ptr("Base"),
@@ -95,32 +95,32 @@ func TestDefaultCarRepository_List(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		filters  models.CarFilters
+		filters  c.CarFilters
 		expected []string
 	}{
 		{
 			name:     "No filters, returns all",
-			filters:  models.CarFilters{},
+			filters:  c.CarFilters{},
 			expected: []string{"1", "2", "3", "4"},
 		},
 		{
 			name:     "Filter by make",
-			filters:  models.CarFilters{Make: "Toyota"},
+			filters:  c.CarFilters{Make: "Toyota"},
 			expected: []string{"2", "3"},
 		},
 		{
 			name:     "Filter by model",
-			filters:  models.CarFilters{Model: "Bronco"},
+			filters:  c.CarFilters{Model: "Bronco"},
 			expected: []string{"4"},
 		},
 		{
 			name:     "Filter by year",
-			filters:  models.CarFilters{Year: u.Ptr(2010)},
+			filters:  c.CarFilters{Year: u.Ptr(2010)},
 			expected: []string{"1"},
 		},
 		{
 			name: "Filter by make and model",
-			filters: models.CarFilters{
+			filters: c.CarFilters{
 				Make:  "Ford",
 				Model: "F10",
 			},
@@ -128,7 +128,7 @@ func TestDefaultCarRepository_List(t *testing.T) {
 		},
 		{
 			name: "Filter by make and year",
-			filters: models.CarFilters{
+			filters: c.CarFilters{
 				Make: "Toyota",
 				Year: u.Ptr(2019),
 			},
@@ -136,7 +136,7 @@ func TestDefaultCarRepository_List(t *testing.T) {
 		},
 		{
 			name: "Filter by model and year",
-			filters: models.CarFilters{
+			filters: c.CarFilters{
 				Model: "Rav4",
 				Year:  u.Ptr(2018),
 			},
@@ -144,7 +144,7 @@ func TestDefaultCarRepository_List(t *testing.T) {
 		},
 		{
 			name: "Filter by make, model and year",
-			filters: models.CarFilters{
+			filters: c.CarFilters{
 				Make:  "Ford",
 				Model: "Bronco",
 				Year:  u.Ptr(2022),
@@ -153,7 +153,7 @@ func TestDefaultCarRepository_List(t *testing.T) {
 		},
 		{
 			name: "Case-insensitive filtering",
-			filters: models.CarFilters{
+			filters: c.CarFilters{
 				Make:  "tOyOtA",
 				Model: "cAmRy",
 			},
@@ -161,7 +161,7 @@ func TestDefaultCarRepository_List(t *testing.T) {
 		},
 		{
 			name:     "No match, returns empty list",
-			filters:  models.CarFilters{Make: "BMW"},
+			filters:  c.CarFilters{Make: "BMW"},
 			expected: []string{},
 		},
 	}
@@ -197,10 +197,10 @@ func TestDefaultCarRepository_List(t *testing.T) {
 func TestDefaultCarRepository_Create(t *testing.T) {
 	// Arrange
 	repo := &DefaultCarRepository{
-		cars: map[string]models.Car{},
+		cars: map[string]c.Car{},
 	}
 
-	car := &models.Car{
+	car := &c.Car{
 		Make:  "Honda",
 		Model: "Civic",
 	}
@@ -231,19 +231,19 @@ func TestDefaultCarRepository_Create(t *testing.T) {
 func TestDefaultCarRepository_Update(t *testing.T) {
 	t.Run("should update existing car", func(t *testing.T) {
 		// Arrange
-		existing := models.Car{
+		existing := c.Car{
 			ID:    "1",
 			Make:  "Toyota",
 			Model: "Corolla",
 		}
 
 		repo := &DefaultCarRepository{
-			cars: map[string]models.Car{
+			cars: map[string]c.Car{
 				existing.ID: existing,
 			},
 		}
 
-		updated := &models.Car{
+		updated := &c.Car{
 			ID:    "1",
 			Make:  "Honda",
 			Model: "Civic",
@@ -271,10 +271,10 @@ func TestDefaultCarRepository_Update(t *testing.T) {
 	t.Run("should return error when car does not exist", func(t *testing.T) {
 		// Arrange
 		repo := &DefaultCarRepository{
-			cars: map[string]models.Car{},
+			cars: map[string]c.Car{},
 		}
 
-		car := &models.Car{
+		car := &c.Car{
 			ID:    "missing-id",
 			Make:  "Mazda",
 			Model: "3",
@@ -291,14 +291,14 @@ func TestDefaultCarRepository_Update(t *testing.T) {
 func TestDefaultCarRepository_Delete(t *testing.T) {
 	t.Run("should delete existing car", func(t *testing.T) {
 		// Arrange
-		car := models.Car{
+		car := c.Car{
 			ID:    "1",
 			Make:  "Toyota",
 			Model: "Corolla",
 		}
 
 		repo := &DefaultCarRepository{
-			cars: map[string]models.Car{
+			cars: map[string]c.Car{
 				car.ID: car,
 			},
 		}
@@ -323,7 +323,7 @@ func TestDefaultCarRepository_Delete(t *testing.T) {
 	t.Run("should return error when car does not exist", func(t *testing.T) {
 		// Arrange
 		repo := &DefaultCarRepository{
-			cars: map[string]models.Car{},
+			cars: map[string]c.Car{},
 		}
 
 		// Act

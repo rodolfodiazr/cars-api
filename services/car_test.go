@@ -1,7 +1,7 @@
 package services
 
 import (
-	"cars/models"
+	c "cars/car"
 	e "cars/pkg/errors"
 	"errors"
 	"net/http"
@@ -9,34 +9,40 @@ import (
 	"testing"
 )
 
-type FindFunc func(id string) (models.Car, error)
-type ListFunc func(filters models.CarFilters) (models.Cars, error)
-type CreateFunc func(car *models.Car) error
-type UpdateFunc func(car *models.Car) error
+type FindFunc func(id string) (c.Car, error)
+type ListFunc func(filters c.CarFilters) (c.Cars, error)
+type CreateFunc func(car *c.Car) error
+type UpdateFunc func(car *c.Car) error
+type PartialUpdateFunc func(params c.CarUpdateParams) (c.Car, error)
 type DeleteFunc func(id string) error
 
 type MockCarRepository struct {
-	FindFn   FindFunc
-	ListFn   ListFunc
-	CreateFn CreateFunc
-	UpdateFn UpdateFunc
-	DeleteFn DeleteFunc
+	FindFn          FindFunc
+	ListFn          ListFunc
+	CreateFn        CreateFunc
+	UpdateFn        UpdateFunc
+	PartialUpdateFn PartialUpdateFunc
+	DeleteFn        DeleteFunc
 }
 
-func (m *MockCarRepository) Find(id string) (models.Car, error) {
+func (m *MockCarRepository) Find(id string) (c.Car, error) {
 	return m.FindFn(id)
 }
 
-func (m *MockCarRepository) List(filters models.CarFilters) (models.Cars, error) {
+func (m *MockCarRepository) List(filters c.CarFilters) (c.Cars, error) {
 	return m.ListFn(filters)
 }
 
-func (m *MockCarRepository) Create(car *models.Car) error {
+func (m *MockCarRepository) Create(car *c.Car) error {
 	return m.CreateFn(car)
 }
 
-func (m *MockCarRepository) Update(car *models.Car) error {
+func (m *MockCarRepository) Update(car *c.Car) error {
 	return m.UpdateFn(car)
+}
+
+func (m *MockCarRepository) PartialUpdate(params c.CarUpdateParams) (c.Car, error) {
+	return m.PartialUpdateFn(params)
 }
 
 func (m *MockCarRepository) Delete(id string) error {
@@ -83,7 +89,7 @@ func assertServiceError(t *testing.T, err error, expected *e.ServiceError) {
 func TestDefaultCarService_Find(t *testing.T) {
 	t.Run("should return car when repository finds it", func(t *testing.T) {
 		// Arrange
-		expected := models.Car{
+		expected := c.Car{
 			ID:       "1",
 			Make:     "Toyota",
 			Model:    "Corolla",
@@ -93,7 +99,7 @@ func TestDefaultCarService_Find(t *testing.T) {
 		}
 
 		repo := &MockCarRepository{
-			FindFn: func(id string) (models.Car, error) {
+			FindFn: func(id string) (c.Car, error) {
 				return expected, nil
 			},
 		}
@@ -125,8 +131,8 @@ func TestDefaultCarService_Find(t *testing.T) {
 		}
 
 		repo := &MockCarRepository{
-			FindFn: func(id string) (models.Car, error) {
-				return models.Car{}, e.ErrCarNotFound
+			FindFn: func(id string) (c.Car, error) {
+				return c.Car{}, e.ErrCarNotFound
 			},
 		}
 
@@ -153,8 +159,8 @@ func TestDefaultCarService_Find(t *testing.T) {
 		}
 
 		repo := &MockCarRepository{
-			FindFn: func(id string) (models.Car, error) {
-				return models.Car{}, expectedErr
+			FindFn: func(id string) (c.Car, error) {
+				return c.Car{}, expectedErr
 			},
 		}
 
@@ -173,7 +179,7 @@ func TestDefaultCarService_Find(t *testing.T) {
 func TestDefaultCarService_List(t *testing.T) {
 	t.Run("should return cars when repository succeeds", func(t *testing.T) {
 		// Arrange
-		expected := models.Cars{
+		expected := c.Cars{
 			{
 				ID:    "1",
 				Make:  "Toyota",
@@ -186,12 +192,12 @@ func TestDefaultCarService_List(t *testing.T) {
 			},
 		}
 
-		filters := models.CarFilters{
+		filters := c.CarFilters{
 			Make: "Toyota",
 		}
 
 		repo := &MockCarRepository{
-			ListFn: func(f models.CarFilters) (models.Cars, error) {
+			ListFn: func(f c.CarFilters) (c.Cars, error) {
 				if f != filters {
 					t.Fatalf("expected filters %+v, got %+v", filters, f)
 				}
@@ -229,7 +235,7 @@ func TestDefaultCarService_List(t *testing.T) {
 		}
 
 		repo := &MockCarRepository{
-			ListFn: func(f models.CarFilters) (models.Cars, error) {
+			ListFn: func(f c.CarFilters) (c.Cars, error) {
 				return nil, expectedErr
 			},
 		}
@@ -239,7 +245,7 @@ func TestDefaultCarService_List(t *testing.T) {
 		}
 
 		// Act
-		_, err := service.List(models.CarFilters{})
+		_, err := service.List(c.CarFilters{})
 
 		// Assert
 		assertServiceError(t, err, expected)
@@ -249,7 +255,7 @@ func TestDefaultCarService_List(t *testing.T) {
 func TestDefaultCarService_Create(t *testing.T) {
 	t.Run("should create car when validation succeeds", func(t *testing.T) {
 		// Arrange
-		car := &models.Car{
+		car := &c.Car{
 			Make:     "Toyota",
 			Model:    "Corolla",
 			Color:    "Gray",
@@ -258,7 +264,7 @@ func TestDefaultCarService_Create(t *testing.T) {
 		}
 
 		repo := &MockCarRepository{
-			CreateFn: func(c *models.Car) error {
+			CreateFn: func(c *c.Car) error {
 				if c != car {
 					t.Fatal("expected same car pointer to be passed to repository")
 				}
@@ -285,13 +291,13 @@ func TestDefaultCarService_Create(t *testing.T) {
 			Code:       e.CodeValidationFailed,
 			Message:    "Validation failed",
 			StatusCode: http.StatusBadRequest,
-			Err:        models.ErrCarMakeRequired,
+			Err:        c.ErrCarMakeRequired,
 		}
 
-		car := &models.Car{}
+		car := &c.Car{}
 
 		repo := &MockCarRepository{
-			CreateFn: func(c *models.Car) error {
+			CreateFn: func(c *c.Car) error {
 				t.Fatal("repository Create should not be called")
 				return nil
 			},
@@ -319,7 +325,7 @@ func TestDefaultCarService_Create(t *testing.T) {
 			Err:        expectedErr,
 		}
 
-		car := &models.Car{
+		car := &c.Car{
 			Make:     "Toyota",
 			Model:    "Corolla",
 			Color:    "Gray",
@@ -328,7 +334,7 @@ func TestDefaultCarService_Create(t *testing.T) {
 		}
 
 		repo := &MockCarRepository{
-			CreateFn: func(c *models.Car) error {
+			CreateFn: func(c *c.Car) error {
 				return expectedErr
 			},
 		}
@@ -348,7 +354,7 @@ func TestDefaultCarService_Create(t *testing.T) {
 func TestDefaultCarService_Update(t *testing.T) {
 	t.Run("should update car when validation succeeds", func(t *testing.T) {
 		// Arrange
-		car := &models.Car{
+		car := &c.Car{
 			ID:       "1",
 			Make:     "Toyota",
 			Model:    "Corolla",
@@ -358,7 +364,7 @@ func TestDefaultCarService_Update(t *testing.T) {
 		}
 
 		repo := &MockCarRepository{
-			UpdateFn: func(c *models.Car) error {
+			UpdateFn: func(c *c.Car) error {
 				if c != car {
 					t.Fatal("expected same car pointer to be passed to repository")
 				}
@@ -385,13 +391,13 @@ func TestDefaultCarService_Update(t *testing.T) {
 			Code:       e.CodeValidationFailed,
 			Message:    "Validation failed",
 			StatusCode: http.StatusBadRequest,
-			Err:        models.ErrCarIDRequiredForUpdate,
+			Err:        c.ErrCarIDRequiredForUpdate,
 		}
 
-		car := &models.Car{}
+		car := &c.Car{}
 
 		repo := &MockCarRepository{
-			UpdateFn: func(c *models.Car) error {
+			UpdateFn: func(c *c.Car) error {
 				t.Fatal("repository Update should not be called")
 				return nil
 			},
@@ -417,7 +423,7 @@ func TestDefaultCarService_Update(t *testing.T) {
 			Err:        e.ErrCarNotFound,
 		}
 
-		car := &models.Car{
+		car := &c.Car{
 			ID:       "1",
 			Make:     "Toyota",
 			Model:    "Corolla",
@@ -427,7 +433,7 @@ func TestDefaultCarService_Update(t *testing.T) {
 		}
 
 		repo := &MockCarRepository{
-			UpdateFn: func(c *models.Car) error {
+			UpdateFn: func(c *c.Car) error {
 				return e.ErrCarNotFound
 			},
 		}
@@ -454,7 +460,7 @@ func TestDefaultCarService_Update(t *testing.T) {
 			Err:        expectedErr,
 		}
 
-		car := &models.Car{
+		car := &c.Car{
 			ID:       "1",
 			Make:     "Toyota",
 			Model:    "Corolla",
@@ -464,7 +470,7 @@ func TestDefaultCarService_Update(t *testing.T) {
 		}
 
 		repo := &MockCarRepository{
-			UpdateFn: func(c *models.Car) error {
+			UpdateFn: func(c *c.Car) error {
 				return expectedErr
 			},
 		}

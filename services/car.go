@@ -13,7 +13,7 @@ type CarService interface {
 	List(filters c.CarFilters) (c.Cars, error)
 	Create(car *c.Car) error
 	Update(car *c.Car) error
-	PartialUpdate(params c.CarUpdateParams) error
+	PartialUpdate(params c.CarUpdateParams) (c.Car, error)
 	Delete(id string) error
 }
 
@@ -81,8 +81,19 @@ func (s *DefaultCarService) Update(car *c.Car) error {
 }
 
 // PartialUpdate ...
-func (s *DefaultCarService) PartialUpdate(params c.CarUpdateParams) error {
-	return nil
+func (s *DefaultCarService) PartialUpdate(params c.CarUpdateParams) (c.Car, error) {
+	if err := params.Validate(); err != nil {
+		return c.Car{}, e.NewValidationError(err)
+	}
+
+	car, err := s.repo.PartialUpdate(params)
+	if err != nil {
+		if errors.Is(err, e.ErrCarNotFound) {
+			return c.Car{}, e.NewCarNotFoundError(err)
+		}
+		return c.Car{}, e.NewInternalError(err)
+	}
+	return car, nil
 }
 
 // Delete removes a car identified by the given ID.

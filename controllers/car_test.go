@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"cars/api/dto"
-	"cars/models"
+	c "cars/car"
 	e "cars/pkg/errors"
 	"cars/pkg/httpx"
 	u "cars/pkg/utils"
@@ -19,24 +19,32 @@ import (
 )
 
 type MockCarRepository struct {
-	FindFn   func(id string) (models.Car, error)
-	ListFn   func(filters models.CarFilters) (models.Cars, error)
-	CreateFn func(car *models.Car) error
-	UpdateFn func(car *models.Car) error
-	DeleteFn func(id string) error
+	FindFn          func(id string) (c.Car, error)
+	ListFn          func(filters c.CarFilters) (c.Cars, error)
+	CreateFn        func(car *c.Car) error
+	UpdateFn        func(car *c.Car) error
+	PartialUpdateFn func(params c.CarUpdateParams) (c.Car, error)
+	DeleteFn        func(id string) error
 }
 
-func (m *MockCarRepository) Find(id string) (models.Car, error) {
+func (m *MockCarRepository) Find(id string) (c.Car, error) {
 	return m.FindFn(id)
 }
-func (m *MockCarRepository) List(filters models.CarFilters) (models.Cars, error) {
+
+func (m *MockCarRepository) List(filters c.CarFilters) (c.Cars, error) {
 	return m.ListFn(filters)
 }
-func (m *MockCarRepository) Create(car *models.Car) error {
+
+func (m *MockCarRepository) Create(car *c.Car) error {
 	return m.CreateFn(car)
 }
-func (m *MockCarRepository) Update(car *models.Car) error {
+
+func (m *MockCarRepository) Update(car *c.Car) error {
 	return m.UpdateFn(car)
+}
+
+func (m *MockCarRepository) PartialUpdate(params c.CarUpdateParams) (c.Car, error) {
+	return m.PartialUpdateFn(params)
 }
 
 func (m *MockCarRepository) Delete(id string) error {
@@ -47,15 +55,15 @@ func Test_Car_Get(t *testing.T) {
 	tCases := []struct {
 		name             string
 		idParam          string
-		findFn           func(id string) (models.Car, error)
+		findFn           func(id string) (c.Car, error)
 		expectedStatus   int
 		expectedResponse any
 	}{
 		{
 			name:    "car not found",
 			idParam: "DEF456",
-			findFn: func(id string) (models.Car, error) {
-				return models.Car{}, e.ErrCarNotFound
+			findFn: func(id string) (c.Car, error) {
+				return c.Car{}, e.ErrCarNotFound
 			},
 			expectedStatus:   http.StatusNotFound,
 			expectedResponse: httpx.ErrorResponse{Message: "Car not found"},
@@ -63,8 +71,8 @@ func Test_Car_Get(t *testing.T) {
 		{
 			name:    "repository error",
 			idParam: "ABC123",
-			findFn: func(id string) (models.Car, error) {
-				return models.Car{}, errors.New("repository error")
+			findFn: func(id string) (c.Car, error) {
+				return c.Car{}, errors.New("repository error")
 			},
 			expectedStatus:   http.StatusInternalServerError,
 			expectedResponse: httpx.ErrorResponse{Message: "Internal server error"},
@@ -72,8 +80,8 @@ func Test_Car_Get(t *testing.T) {
 		{
 			name:    "car found",
 			idParam: "ABC123",
-			findFn: func(id string) (models.Car, error) {
-				return models.Car{
+			findFn: func(id string) (c.Car, error) {
+				return c.Car{
 					ID:       "ABC123",
 					Make:     "Chevrolet",
 					Model:    "Onix",
@@ -145,14 +153,14 @@ func Test_Car_List(t *testing.T) {
 	tCases := []struct {
 		name             string
 		queryParams      string
-		listFn           func(f models.CarFilters) (models.Cars, error)
+		listFn           func(f c.CarFilters) (c.Cars, error)
 		expectedStatus   int
 		expectedResponse any
 	}{
 		{
 			name: "list all cars",
-			listFn: func(f models.CarFilters) (models.Cars, error) {
-				return models.Cars{
+			listFn: func(f c.CarFilters) (c.Cars, error) {
+				return c.Cars{
 					{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Package: u.Ptr("ABC"), Color: "Black", Category: "Sedan", Year: 2025},
 					{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: u.Ptr("DEF"), Color: "Red", Category: "Sedan", Year: 2025},
 					{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: u.Ptr("GHI"), Color: "White", Category: "Sedan", Year: 2025},
@@ -168,11 +176,11 @@ func Test_Car_List(t *testing.T) {
 		{
 			name:        "list filtered by make",
 			queryParams: "?make=Toyota",
-			listFn: func(f models.CarFilters) (models.Cars, error) {
+			listFn: func(f c.CarFilters) (c.Cars, error) {
 				if f.Make != "Toyota" {
 					t.Errorf("expected make %q, got %q", "Toyota", f.Make)
 				}
-				return models.Cars{
+				return c.Cars{
 					{ID: "DEF456", Make: "Toyota", Model: "Yaris", Package: u.Ptr("DEF"), Color: "Red", Category: "Sedan", Year: 2025},
 				}, nil
 			},
@@ -184,11 +192,11 @@ func Test_Car_List(t *testing.T) {
 		{
 			name:        "list filtered by model",
 			queryParams: "?model=Arkana",
-			listFn: func(f models.CarFilters) (models.Cars, error) {
+			listFn: func(f c.CarFilters) (c.Cars, error) {
 				if f.Model != "Arkana" {
 					t.Errorf("expected model %q, got %q", "Arkana", f.Model)
 				}
-				return models.Cars{
+				return c.Cars{
 					{ID: "GHI789", Make: "Renault", Model: "Arkana", Package: u.Ptr("GHI"), Color: "White", Category: "Sedan", Year: 2025},
 				}, nil
 			},
@@ -200,14 +208,14 @@ func Test_Car_List(t *testing.T) {
 		{
 			name:        "list filtered by year",
 			queryParams: "?year=2025",
-			listFn: func(f models.CarFilters) (models.Cars, error) {
+			listFn: func(f c.CarFilters) (c.Cars, error) {
 				if f.Year == nil {
 					t.Fatal("expected year filter")
 				}
 				if *f.Year != 2025 {
 					t.Errorf("expected year %d, got %d", 2025, *f.Year)
 				}
-				return models.Cars{
+				return c.Cars{
 					{ID: "ABC123", Make: "Chevrolet", Model: "Onix", Color: "Black", Category: "Sedan", Year: 2025},
 				}, nil
 			},
@@ -224,7 +232,7 @@ func Test_Car_List(t *testing.T) {
 		},
 		{
 			name: "repository error",
-			listFn: func(f models.CarFilters) (models.Cars, error) {
+			listFn: func(f c.CarFilters) (c.Cars, error) {
 				return nil, errors.New("repository error")
 			},
 			expectedStatus:   http.StatusInternalServerError,
@@ -284,7 +292,7 @@ func Test_Car_Create(t *testing.T) {
 	tCases := []struct {
 		name             string
 		body             string
-		createFn         func(car *models.Car) error
+		createFn         func(car *c.Car) error
 		expectedStatus   int
 		expectedLocation string
 		expectedResponse any
@@ -328,7 +336,7 @@ func Test_Car_Create(t *testing.T) {
 		{
 			name: "repository error",
 			body: `{"make": "Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
-			createFn: func(car *models.Car) error {
+			createFn: func(car *c.Car) error {
 				return errors.New("repository error")
 			},
 			expectedStatus:   http.StatusInternalServerError,
@@ -337,7 +345,7 @@ func Test_Car_Create(t *testing.T) {
 		{
 			name: "car created successfully",
 			body: `{"make":"Chevrolet","model":"Onix","color":"Gray","category":"Sedan","year":2025}`,
-			createFn: func(car *models.Car) error {
+			createFn: func(car *c.Car) error {
 				car.ID = "ABC123"
 				return nil
 			},
@@ -414,7 +422,7 @@ func Test_Car_Update(t *testing.T) {
 		name             string
 		idParam          string
 		body             string
-		updateFn         func(car *models.Car) error
+		updateFn         func(car *c.Car) error
 		expectedStatus   int
 		expectedResponse any
 	}{
@@ -464,7 +472,7 @@ func Test_Car_Update(t *testing.T) {
 			name:    "car not found",
 			idParam: "ABC123",
 			body:    `{"make":"Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
-			updateFn: func(car *models.Car) error {
+			updateFn: func(car *c.Car) error {
 				return e.ErrCarNotFound
 			},
 			expectedStatus:   http.StatusNotFound,
@@ -474,7 +482,7 @@ func Test_Car_Update(t *testing.T) {
 			name:    "repository error",
 			idParam: "ABC123",
 			body:    `{"make":"Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
-			updateFn: func(car *models.Car) error {
+			updateFn: func(car *c.Car) error {
 				return errors.New("repository error")
 			},
 			expectedStatus:   http.StatusInternalServerError,
@@ -484,7 +492,7 @@ func Test_Car_Update(t *testing.T) {
 			name:    "car updated successfully",
 			idParam: "ABC123",
 			body:    `{"make":"Chevrolet", "model":"Onix", "color":"Gray", "category":"Sedan", "year":2025}`,
-			updateFn: func(car *models.Car) error {
+			updateFn: func(car *c.Car) error {
 				return nil
 			},
 			expectedStatus: http.StatusOK,
