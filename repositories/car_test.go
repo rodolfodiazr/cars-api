@@ -288,6 +288,78 @@ func TestDefaultCarRepository_Update(t *testing.T) {
 	})
 }
 
+func TestDefaultCarRepository_PartialUpdate(t *testing.T) {
+	t.Run("should partial update existing car", func(t *testing.T) {
+		// Arrange
+		existing := c.Car{
+			ID:    "1",
+			Make:  "Toyota",
+			Model: "Corolla",
+		}
+
+		repo := &DefaultCarRepository{
+			cars: map[string]c.Car{
+				existing.ID: existing,
+			},
+		}
+
+		params := c.CarUpdateParams{
+			ID: "1",
+			Make: func() *string {
+				make := "Toyota"
+				return &make
+			}(),
+			Model: func() *string {
+				model := "Corolla"
+				return &model
+			}(),
+		}
+
+		// Act
+		updated, err := repo.PartialUpdate(params)
+
+		// Assert
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		stored, exists := repo.cars[params.ID]
+
+		if !exists {
+			t.Fatal("expected updated car to exist in repository")
+		}
+
+		if stored != updated {
+			t.Fatalf("expected stored car %+v, got %+v", updated, stored)
+		}
+	})
+
+	t.Run("should return error when car does not exist", func(t *testing.T) {
+		// Arrange
+		repo := &DefaultCarRepository{
+			cars: map[string]c.Car{},
+		}
+
+		params := c.CarUpdateParams{
+			ID: "missing-id",
+			Make: func() *string {
+				make := "Toyota"
+				return &make
+			}(),
+			Model: func() *string {
+				model := "Corolla"
+				return &model
+			}(),
+		}
+
+		// Act
+		_, err := repo.PartialUpdate(params)
+
+		// Assert
+		assertRepositoryError(t, err, e.ErrCarNotFound)
+	})
+}
+
 func TestDefaultCarRepository_Delete(t *testing.T) {
 	t.Run("should delete existing car", func(t *testing.T) {
 		// Arrange

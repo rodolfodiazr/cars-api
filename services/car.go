@@ -80,7 +80,7 @@ func (s *DefaultCarService) Update(car *c.Car) error {
 	return nil
 }
 
-// PartialUpdate ...
+// PartialUpdate partially updates an existing car.
 func (s *DefaultCarService) PartialUpdate(params c.CarUpdateParams) (c.Car, error) {
 	if err := params.Validate(); err != nil {
 		return c.Car{}, e.NewValidationError(err)
