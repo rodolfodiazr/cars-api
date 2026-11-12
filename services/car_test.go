@@ -487,6 +487,131 @@ func TestDefaultCarService_Update(t *testing.T) {
 	})
 }
 
+func TestDefaultCarService_PartialUpdate(t *testing.T) {
+	t.Run("should partial update car when validation succeeds", func(t *testing.T) {
+		// Arrange
+		params := c.CarUpdateParams{
+			ID: "1",
+		}
+
+		repo := &MockCarRepository{
+			PartialUpdateFn: func(params c.CarUpdateParams) (c.Car, error) {
+				return c.Car{
+					ID:       "1",
+					Make:     "Toyota",
+					Model:    "Camry",
+					Color:    "White",
+					Category: "Sedan",
+					Year:     2020,
+				}, nil
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		_, err := service.PartialUpdate(params)
+
+		// Assert
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("should return validation error when car is invalid", func(t *testing.T) {
+		// Arrange
+		params := c.CarUpdateParams{}
+
+		expected := &e.ServiceError{
+			Code:       e.CodeValidationFailed,
+			Message:    "Validation failed",
+			StatusCode: http.StatusBadRequest,
+			Err:        c.ErrCarIDRequiredForUpdate,
+		}
+
+		repo := &MockCarRepository{
+			PartialUpdateFn: func(params c.CarUpdateParams) (c.Car, error) {
+				t.Fatal("repository Update should not be called")
+				return c.Car{}, nil
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		_, err := service.PartialUpdate(params)
+
+		// Assert
+		assertServiceError(t, err, expected)
+	})
+
+	t.Run("should return car not found error when repository returns ErrCarNotFound", func(t *testing.T) {
+		// Arrange
+		params := c.CarUpdateParams{
+			ID: "1",
+		}
+
+		expected := &e.ServiceError{
+			Code:       e.CodeCarNotFound,
+			Message:    "Car not found",
+			StatusCode: http.StatusNotFound,
+			Err:        e.ErrCarNotFound,
+		}
+
+		repo := &MockCarRepository{
+			PartialUpdateFn: func(params c.CarUpdateParams) (c.Car, error) {
+				return c.Car{}, e.ErrCarNotFound
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		_, err := service.PartialUpdate(params)
+
+		// Assert
+		assertServiceError(t, err, expected)
+	})
+
+	t.Run("should return internal error when repository fails unexpectedly", func(t *testing.T) {
+		// Arrange
+		params := c.CarUpdateParams{
+			ID: "1",
+		}
+
+		expectedErr := errors.New("database unavailable")
+
+		expected := &e.ServiceError{
+			Code:       e.CodeInternalError,
+			Message:    "Internal server error",
+			StatusCode: http.StatusInternalServerError,
+			Err:        expectedErr,
+		}
+
+		repo := &MockCarRepository{
+			PartialUpdateFn: func(params c.CarUpdateParams) (c.Car, error) {
+				return c.Car{}, expectedErr
+			},
+		}
+
+		service := &DefaultCarService{
+			repo: repo,
+		}
+
+		// Act
+		_, err := service.PartialUpdate(params)
+
+		// Assert
+		assertServiceError(t, err, expected)
+	})
+}
+
 func TestDefaultCarService_Delete(t *testing.T) {
 	t.Run("should delete car when repository succeeds", func(t *testing.T) {
 		// Arrange

@@ -24,6 +24,10 @@ type CarUpdateParams struct {
 }
 
 func (c CarUpdateParams) Validate() error {
+	if isBlank(c.ID) {
+		return ErrCarIDRequiredForUpdate
+	}
+
 	if c.Make != nil && isBlank(*c.Make) {
 		return ErrCarMakeRequired
 	}
