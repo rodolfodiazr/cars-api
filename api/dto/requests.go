@@ -17,3 +17,16 @@ type CarUpsertRequest struct {
 
 type CreateCarRequest = CarUpsertRequest
 type UpdateCarRequest = CarUpsertRequest
+
+// PartialUpdateCarRequest represents the payload for partially updating a car.
+type PartialUpdateCarRequest struct {
+	Make     *string `json:"make"`
+	Model    *string `json:"model"`
+	Color    *string `json:"color"`
+	Category *string `json:"category"`
+	Year     *int    `json:"year"`
+
+	Package *string `json:"package,omitempty"`
+	Mileage *int64  `json:"mileage,omitempty"`
+	Price   *int64  `json:"price,omitempty"`
+}

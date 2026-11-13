@@ -179,6 +179,44 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	log.Printf("car updated id=%s", id)
 }
 
+// Method: PATCH
+// Path: /cars/{id}
+func (c *CarController) PartialUpdate(w http.ResponseWriter, r *http.Request) {
+	log := logger.FromContext(r.Context())
+
+	id, err := getIDParam(r)
+	if err != nil {
+		httpx.HandleServiceError(w, err)
+		return
+	}
+
+	req, err := httpx.Decode[dto.PartialUpdateCarRequest](r)
+	if err != nil {
+		log.Printf("error decoding car payload: %v", err)
+		httpx.HandleServiceError(w, err)
+		return
+	}
+
+	params := mappers.ToModelPartialUpdate(id, *req)
+
+	car, err := c.service.PartialUpdate(params)
+	if err != nil {
+		log.Printf("error updating car id=%s: %v", car.ID, err)
+		httpx.HandleServiceError(w, err)
+		return
+	}
+
+	resp := mappers.ToResponse(&car)
+
+	if err := httpx.JSON(w, http.StatusOK, resp); err != nil {
+		log.Printf("error encoding partial updated car response: %v", err)
+		httpx.HandleServiceError(w, err)
+		return
+	}
+
+	log.Printf("car partial updated id=%s", id)
+}
+
 // Delete handles removing an existing car.
 //
 // This endpoint permanently deletes the car resource identified by its ID.

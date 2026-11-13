@@ -24,6 +24,25 @@ func ToModelUpdate(id string, req dto.UpdateCarRequest) *c.Car {
 	return car
 }
 
+// ToModelPartialUpdate maps an PartialUpdateCarRequest to a CarUpdateParams model,
+// assigning the provided ID to the resulting entity.
+//
+// It is intended for partial update operations, where the ID identifies
+// the existing resource being modified.
+func ToModelPartialUpdate(id string, req dto.PartialUpdateCarRequest) c.CarUpdateParams {
+	return c.CarUpdateParams{
+		ID:       id,
+		Make:     req.Make,
+		Model:    req.Model,
+		Color:    req.Color,
+		Category: req.Category,
+		Year:     req.Year,
+		Package:  req.Package,
+		Mileage:  req.Mileage,
+		Price:    req.Price,
+	}
+}
+
 // toModel maps a CarUpsertRequest to a Car model.
 //
 // It is an internal helper shared by create and update mappings.
