@@ -66,6 +66,9 @@ func Register() *chi.Mux {
 			// All fields must be provided; partial updates are not supported.
 			r.Put("/", cars.Update)
 
+			// PATCH /cars/{id}
+			r.Patch("/", cars.PartialUpdate)
+
 			// DELETE /cars/{id}
 			// Deletes a car by its ID.
 			r.Delete("/", cars.Delete)

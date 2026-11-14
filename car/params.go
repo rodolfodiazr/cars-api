@@ -45,7 +45,7 @@ func (c CarUpdateParams) Validate() error {
 	}
 
 	currentYear := time.Now().Year()
-	if c.Year != nil && *c.Year < 0 && *c.Year > currentYear {
+	if c.Year != nil && (*c.Year <= 0 || *c.Year > currentYear) {
 		return ErrInvalidYear
 	}
 
