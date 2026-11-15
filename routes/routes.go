@@ -63,10 +63,12 @@ func Register() *chi.Mux {
 
 			// PUT /cars/{id}
 			// Performs a full replacement of the car resource.
-			// All fields must be provided; partial updates are not supported.
+			// All fields must be provided
 			r.Put("/", cars.Update)
 
 			// PATCH /cars/{id}
+			// Partially updates the car resource.
+			// Only the provided fields are updated; all other fields remain unchanged.
 			r.Patch("/", cars.PartialUpdate)
 
 			// DELETE /cars/{id}
