@@ -18,11 +18,12 @@ import (
 //
 // Routes:
 //
-//	GET    /cars          - List all cars (supports optional filtering via query params)
-//	POST   /cars          - Create a new car
-//	GET    /cars/{id}     - Retrieve a car by ID
-//	PUT    /cars/{id}     - Replace an existing car (full update)
-//	DELETE /cars/{id}     - Delete a car by ID
+// GET		/cars			- List all cars (supports optional filtering via query params)
+// POST		/cars			- Create a new car
+// GET		/cars/{id}		- Retrieve a car by ID
+// PUT		/cars/{id}		- Replace an existing car (full update)
+// PATCH	/cars/{id}		- Partially update an existing car
+// DELETE	/cars/{id}		- Delete a car by ID
 //
 // Middleware applied:
 //
@@ -63,7 +64,7 @@ func Register() *chi.Mux {
 
 			// PUT /cars/{id}
 			// Performs a full replacement of the car resource.
-			// All fields must be provided
+			// All fields must be provided.
 			r.Put("/", cars.Update)
 
 			// PATCH /cars/{id}
