@@ -179,6 +179,11 @@ func (c *CarController) Update(w http.ResponseWriter, r *http.Request) {
 	log.Printf("car updated id=%s", id)
 }
 
+// PartialUpdate handles partially updating an existing car.
+//
+// This endpoint updates only the fields provided in the request body.
+// Any field omitted from the request remains unchanged.
+//
 // Method: PATCH
 // Path: /cars/{id}
 func (c *CarController) PartialUpdate(w http.ResponseWriter, r *http.Request) {
