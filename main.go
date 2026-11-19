@@ -1,13 +1,19 @@
 package main
 
 import (
+	"cars/data"
+	"cars/repositories"
 	"cars/routes"
+	"cars/services"
 	"log"
 	"net/http"
 )
 
 func main() {
-	r := routes.Register()
+	repo := repositories.NewCarRepository(data.Cars())
+	service := services.NewCarService(repo)
+
+	r := routes.Register(service)
 
 	log.Println("Starting server on :8080")
 

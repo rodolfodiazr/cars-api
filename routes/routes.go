@@ -2,9 +2,7 @@ package routes
 
 import (
 	"cars/controllers"
-	"cars/data"
 	"cars/pkg/middleware"
-	"cars/repositories"
 	"cars/services"
 
 	"github.com/go-chi/chi/v5"
@@ -13,30 +11,11 @@ import (
 
 // Register initializes and configures the application's HTTP routes.
 //
-// It sets up the dependency chain (repository → service → controller),
-// applies global middlewares, and registers all endpoints under the "/cars" path.
+// It creates the car controller using the provided service,
+// applies global middlewares, and registers all car endpoints.
 //
-// Routes:
-//
-// GET		/cars			- List all cars (supports optional filtering via query params)
-// POST		/cars			- Create a new car
-// GET		/cars/{id}		- Retrieve a car by ID
-// PUT		/cars/{id}		- Replace an existing car (full update)
-// PATCH	/cars/{id}		- Partially update an existing car
-// DELETE	/cars/{id}		- Delete a car by ID
-//
-// Middleware applied:
-//
-//   - CleanPath: normalizes URL paths
-//   - Recoverer: recovers from panics and returns HTTP 500
-//   - Logging: custom request logging middleware
-//
-// Returns:
-//
-//	A configured *chi.Mux router ready to be used by an HTTP server.
-func Register() *chi.Mux {
-	repo := repositories.NewCarRepository(data.Cars())
-	service := services.NewCarService(repo)
+// Returns a configured *chi.Mux router.
+func Register(service services.CarService) *chi.Mux {
 	cars := controllers.NewCarController(service)
 
 	r := chi.NewRouter()
