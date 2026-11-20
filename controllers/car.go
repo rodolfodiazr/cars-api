@@ -206,7 +206,7 @@ func (c *CarController) PartialUpdate(w http.ResponseWriter, r *http.Request) {
 
 	car, err := c.service.PartialUpdate(params)
 	if err != nil {
-		log.Printf("error updating car id=%s: %v", car.ID, err)
+		log.Printf("error partially updating car id=%s: %v", car.ID, err)
 		httpx.HandleServiceError(w, err)
 		return
 	}
@@ -219,7 +219,7 @@ func (c *CarController) PartialUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("car partial updated id=%s", id)
+	log.Printf("car partially updated id=%s", id)
 }
 
 // Delete handles removing an existing car.
