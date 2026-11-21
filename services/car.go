@@ -29,7 +29,7 @@ func NewCarService(repo repositories.CarRepository) CarService {
 	}
 }
 
-// Find retrieves a car by its ID if it exists.
+// Find retrieves an existing car by its ID.
 func (s *DefaultCarService) Find(id string) (c.Car, error) {
 	car, err := s.repo.Find(id)
 	if err != nil {
@@ -64,7 +64,7 @@ func (s *DefaultCarService) Create(car *c.Car) error {
 	return nil
 }
 
-// Update replaces an existing car with the provided data.
+// Update replaces an existing car in the repository.
 // The car must contain all required fields and a valid ID.
 func (s *DefaultCarService) Update(car *c.Car) error {
 	if err := car.ValidateForUpdate(); err != nil {
@@ -81,6 +81,7 @@ func (s *DefaultCarService) Update(car *c.Car) error {
 }
 
 // PartialUpdate partially updates an existing car.
+// The params must contain a valid ID.
 func (s *DefaultCarService) PartialUpdate(params c.CarUpdateParams) (c.Car, error) {
 	if err := params.Validate(); err != nil {
 		return c.Car{}, e.NewValidationError(err)
@@ -96,7 +97,7 @@ func (s *DefaultCarService) PartialUpdate(params c.CarUpdateParams) (c.Car, erro
 	return car, nil
 }
 
-// Delete removes a car identified by the given ID.
+// Delete removes a car identified by its ID.
 func (s *DefaultCarService) Delete(id string) error {
 	if err := s.repo.Delete(id); err != nil {
 		if errors.Is(err, e.ErrCarNotFound) {

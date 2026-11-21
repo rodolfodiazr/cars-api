@@ -36,7 +36,7 @@ func NewCarRepository(initialData map[string]c.Car) CarRepository {
 	return repo
 }
 
-// Find searches for a car by its ID.
+// Find retrieves a car by its ID.
 func (r *DefaultCarRepository) Find(id string) (c.Car, error) {
 	r.mu.RLock()
 	car, exists := r.cars[id]
@@ -48,7 +48,7 @@ func (r *DefaultCarRepository) Find(id string) (c.Car, error) {
 	return car, nil
 }
 
-// List returns all stored cars.
+// List returns all stored cars matching the provided filters.
 func (r *DefaultCarRepository) List(f c.CarFilters) (c.Cars, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -140,7 +140,7 @@ func (r *DefaultCarRepository) PartialUpdate(params c.CarUpdateParams) (c.Car, e
 	return updatedCar, nil
 }
 
-// Delete removes a car identified by the given id from the repository.
+// Delete removes a car identified by its ID from the repository.
 func (r *DefaultCarRepository) Delete(id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
